@@ -44,6 +44,7 @@ function Home() {
 
     }, [filteredCars])
 
+    let currentUser = JSON.parse(localStorage.getItem("user"))._id
 
     function setFilter(values) {
 
@@ -141,20 +142,20 @@ function Home() {
 
             <Row justify='center' gutter={64}>
 
-                {totalCars.map(car => {
+                {totalCars.filter(car => car.user !== currentUser).map(car => {
                     return <Col lg={5} sm={24} xs={24}>
                         <div className="car p-2 bs1">
                             <img src={car.image} className="carimg"/>
 
                             <div className="car-content d-flex align-items-center justify-content-between">
 
-                                <div className='text-left pl-2'>
-                                    <p>{car.name}</p>
-                                    <p> Rent Per Hour {car.rentPerHour} /-</p>
+                                <div className='text-left '>
+                                    <p className={'carnameinhomepages'}>{car.name}</p>
+                                    <p className={'rentPerHour'}> {car.rentPerHour} $/Hour</p>
                                 </div>
 
                                 <div>
-                                    <button className="btn1 mr-2"><Link to={`/booking/${car._id}`}>Book Now</Link>
+                                    <button className="btn1 mr-1"><a className={'viewDetails'} href={`/booking/${car._id}`}>View details</a>
                                     </button>
                                 </div>
 

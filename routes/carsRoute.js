@@ -1,11 +1,24 @@
 const express = require("express");
 const router = express.Router();
 const Car = require("../models/carModel");
+const Location = require("../models/locationModel");
 
 router.get("/getallcars", async (req, res) => {
   try {
-    const cars = await Car.find();
-    res.send(cars);
+    // const cars = await Car.find();
+    // res.send(cars);
+
+    await Car.aggregate([{
+      $lookup: {
+        from: "locations", // collection name in db
+        localField: "address",
+        foreignField: "_id",
+        as: "address"
+      }}],{
+    }).exec(function(err, cars) {
+      console.log(cars)
+      res.send(cars)
+    });
   } catch (error) {
     return res.status(400).json(error);
   }
@@ -18,7 +31,8 @@ router.post("/getfilteredcars", async (req, res) => {
           $and: [
             {rentPerHour: {$lte: rentPerHour[1]}},
             {rentPerHour: {$gte: rentPerHour[0]}},
-            {$contains: {name: name}}
+            // {name: {$regex : name}} //case sensitive
+            {name: new RegExp(name, 'i') } //case insensitive
           ]
         });
     res.send(cars);
@@ -29,7 +43,13 @@ router.post("/getfilteredcars", async (req, res) => {
 
 router.post("/addcar", async (req, res) => {
   try {
-    const newcar = new Car(req.body);
+    const {country,city,street, ...carInfo}=req.body
+
+    const newlocation = new Location({country,city,street});
+    console.log(newlocation)
+    await newlocation.save();
+
+    const newcar = new Car({...carInfo, address: newlocation._id});
     await newcar.save();
     res.send("Car added successfully");
   } catch (error) {

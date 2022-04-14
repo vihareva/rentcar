@@ -18,8 +18,8 @@ router.post("/bookcar", async (req, res) => {
 
     const payment = await stripe.charges.create(
       {
-        amount: req.body.totalAmount * 100,
-        currency: "inr",
+        amount: req.body.totalAmount,
+        currency: "usd",
         customer: customer.id,
         receipt_email: token.email
       },

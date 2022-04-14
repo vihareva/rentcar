@@ -1,7 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&display=swap');
 body {
   margin: 0;
-  font-family: 'Montserrat', sans-serif !important;
+  font-family: 'Rubik', sans-serif !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: azure;
@@ -28,26 +29,44 @@ code {
 h1{
   font-size: 30px;
   font-weight: bold;
-  color : orangered;
+  color : #3D5974;
 }
 p{
   margin: 5px !important;
-  
   padding: 0;
 }
 .btn1{
   box-shadow: none !important;
-  background-color : white !important;
-  color: orangered !important;
-  border: 1px solid orangered !important;
+  background-color : white ;
+  color: #3D5974 ;
+  border: 1px solid #3D5974 ;
   padding: 5px 15px !important;
   outline: none !important;
+ border-radius: 3px;
 }
-.bt1:focus{
-  border: none;
+/*.bt1:focus{*/
+/*  border: none;*/
+/*}*/
+
+.btn1:hover,.btn1:focus{
+  background: #0988ff;
+  color: #FFF;
+  border: 1px solid white;
+}
+button:hover > a , button:focus > a {
+  color: white;
+}
+.viewDetails{
+  color: #3D5974 ;
 }
 button{
   padding: 3px 10px !important;
+}
+
+.rentPerHour{
+  color: #0988ff;
+  font-size: 14px ;
+  font-weight: 500;
 }
 .header{
   padding: 10px;
@@ -56,8 +75,8 @@ button{
 .header .ant-btn{
   box-shadow: none !important;
   background-color : white !important;
-  color: orangered !important;
-  border: 1px solid orangered !important;
+  /*color: #3D5974 ;*/
+  border: 1px solid #3D5974 !important;
   padding: 5px 15px !important;
   outline: none !important;
 }
@@ -82,10 +101,8 @@ button{
   height :220px;
 }
 .car:hover > .car-content{
-
     opacity: 1;
-    transform : translateY(-40px)
-
+    transform : translateY(-50px)
 }
 .carimg{
   height:180px;
@@ -145,6 +162,50 @@ svg{
   height:20px !important;
   width : 20px !important;
 }
-a{
-  color: orangered !important;
+
+
+.lightTheme{
+  background: aliceblue;
+}
+
+.darkTheme{
+  background:#1F1F1F;
+}
+
+.review{
+  background: #FFF;
+  margin-bottom: 30px;
+  padding: 30px 30px 30px 30px;
+ /*// box-shadow: rgba(14, 30, 37, 0.12) 0px 2px 4px 0px, rgba(14, 30, 37, 0.32) 0px 2px 16px 0px;*/
+  box-shadow: 2px 2px 8px 0 rgb(0 0 0 / 20%);
+  width: 40%;
+  height: 40%;
+  border-radius: 5px;
+}
+.carimgreview{
+  height: 300px;
+  border-radius: 10px;
+  width: auto;
+}
+.carnameinreview{
+  font-size: 30px;
+  text-transform: none;
+  font-weight: 400;
+
+  color: #3d5974;
+}
+.usernameinreview{
+  color: #0988ff;
+  display: inline-block;
+  font-size: 20px;
+  font-weight: 500;
+}
+.descriptioninreview{
+  line-height: 30px;
+  font-size: 15px;
+  color: #879db2;
+}
+.carnameinhomepages{
+  font-size: 19px;
+  font-weight: 500;
 }

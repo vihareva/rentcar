@@ -18,6 +18,7 @@ app.use(express.json())
 app.use('/api/cars/' , require('./routes/carsRoute'))
 app.use('/api/users/' , require('./routes/usersRoute'))
 app.use('/api/bookings/' , require('./routes/bookingsRoute'))
+app.use('/api/reviews/' , require('./routes/reviewsRoute'))
 
 
 const path = require('path')

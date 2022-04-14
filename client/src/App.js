@@ -10,6 +10,8 @@ import UserBookings from './pages/UserBookings';
 import AddCar from './pages/AddCar';
 import AdminHome from './pages/AdminHome';
 import EditCar from './pages/EditCar';
+import {Reviews} from "./pages/Reviews";
+import AddReview from "./pages/AddReview";
 
 function App() {
   return (
@@ -27,7 +29,8 @@ function App() {
              <ProtectedRoute path='/addcar' exact component={AddCar} />
              <ProtectedRoute path='/editcar/:carid' exact component={EditCar} />
              <ProtectedRoute path='/admin' exact component={AdminHome} />
-         
+             <Route path='/reviews' exact component={Reviews} />
+             <ProtectedRoute path='/addreview' exact component={AddReview} />
          </BrowserRouter>
 
     </div>

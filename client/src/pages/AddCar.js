@@ -1,53 +1,69 @@
-import { Col , Row , Form , Input} from 'antd'
+import {Col, Row, Form, Input} from 'antd'
 import React from 'react'
-import { useDispatch , useSelector } from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
 import DefaultLayout from '../components/DefaultLayout'
 import Spinner from '../components/Spinner'
-import { addCar } from '../redux/actions/carsActions'
+import {addCar} from '../redux/actions/carsActions'
+
 function AddCar() {
 
     const dispatch = useDispatch()
-    const {loading} = useSelector(state=>state.alertsReducer)
+    const {loading} = useSelector(state => state.alertsReducer)
 
-    function onFinish(values){
+    function onFinish(values) {
+        values.bookedTimeSlots = []
+        let carObj = {...values, user: JSON.parse(localStorage.getItem("user"))._id}
 
-         values.bookedTimeSlots=[]
-
-         dispatch(addCar(values))
-         console.log(values)
+        dispatch(addCar(carObj))
+        console.log(carObj)
     }
 
     return (
         <DefaultLayout>
-               {loading && (<Spinner />)}
-               <Row justify='center mt-5'>
-                   <Col lg={12} sm={24} xs={24} className='p-2'>
-                       <Form className='bs1 p-2' layout='vertical' onFinish={onFinish}>
-                           <h3>Add New Car</h3>
-                           <hr />
-                           <Form.Item name='name' label='Car name' rules={[{required: true}]}>
-                               <Input/>
-                           </Form.Item>
-                           <Form.Item name='image' label='Image url' rules={[{required: true}]}>
-                               <Input/>
-                           </Form.Item>
-                           <Form.Item name='rentPerHour' label='Rent per hour' rules={[{required: true}]}>
-                               <Input/>
-                           </Form.Item>
-                           <Form.Item name='capacity' label='Capacity' rules={[{required: true}]}>
-                               <Input/>
-                           </Form.Item>
-                           <Form.Item name='fuelType' label='Fuel Type' rules={[{required: true}]}>
-                               <Input/>
-                           </Form.Item>
+            {loading && (<Spinner/>)}
+            <Row justify='center mt-5'>
+                <Col lg={12} sm={24} xs={24} className='p-2'>
+                    <Form className='bs1 p-2' layout='vertical' onFinish={onFinish}>
+                        <h3>Add New Car</h3>
+                        <hr/>
+                        <Form.Item name='name' label='Car name' rules={[{required: true}]}>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item name='image' label='Image url' rules={[{required: true}]}>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item name='rentPerHour' label='Rent per hour' rules={[{required: true}]}>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item name='capacity' label='Capacity' rules={[{required: true}]}>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item name='fuelType' label='Fuel Type' rules={[{required: true}]}>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item name='transmission' label='Transmission' rules={[{required: true}]}>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item name='engineCapacity' label='Engine Capacity' rules={[{required: true}]}>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item name='country' label='country' rules={[{required: true}]}>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item name='city' label='city' rules={[{required: true}]}>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item name='street' label='street' rules={[{required: true}]}>
+                            <Input/>
+                        </Form.Item>
 
-                           <div className='text-right'>
-                           <button className='btn1'>ADD CAR</button>
-                           </div>
+                        <div className='text-right'>
+                            <button className='btn1'>ADD CAR</button>
+                        </div>
 
-                       </Form>
-                   </Col>
-               </Row>
+                    </Form>
+                </Col>
+            </Row>
 
         </DefaultLayout>
     )
