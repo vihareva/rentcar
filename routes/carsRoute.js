@@ -2,86 +2,142 @@ const express = require("express");
 const router = express.Router();
 const Car = require("../models/carModel");
 const Location = require("../models/locationModel");
+const Category = require("../models/categoryModel");
 
 router.get("/getallcars", async (req, res) => {
-  try {
-    // const cars = await Car.find();
-    // res.send(cars);
+    try {
+        // const cars = await Car.find();
+        // res.send(cars);
 
-    await Car.aggregate([{
-      $lookup: {
-        from: "locations", // collection name in db
-        localField: "address",
-        foreignField: "_id",
-        as: "address"
-      }}],{
-    }).exec(function(err, cars) {
-      console.log(cars)
-      res.send(cars)
-    });
-  } catch (error) {
-    return res.status(400).json(error);
-  }
+        await Car.aggregate([{
+            $lookup: {
+                from: "locations", // collection name in db
+                localField: "address",
+                foreignField: "_id",
+                as: "address"
+            }
+        }], {}).exec(function (err, cars) {
+            console.log(cars)
+            res.send(cars)
+        });
+    } catch (error) {
+        return res.status(400).json(error);
+    }
+});
+
+router.get("/getallcategories", async (req, res) => {
+    try {
+        const categories = await Category.find();
+        res.send(categories);
+        console.log(categories)
+
+    } catch (error) {
+        return res.status(400).json(error);
+    }
+});
+
+router.post("/findcarsincategory", async (req, res) => {
+    try {
+        const categories = await Category.find({category: {$in: req.body.categories}})
+        console.log(categories)
+        const cars = await Car.find({category: {$in: categories.map(c => c._id)}})
+        console.log(cars)
+        res.send(cars);
+    } catch (error) {
+        return res.status(400).json(error);
+    }
 });
 
 router.post("/getfilteredcars", async (req, res) => {
-  try {
-    const { name, rentPerHour} = req.body
-    const cars = await Car.find({
-          $and: [
-            {rentPerHour: {$lte: rentPerHour[1]}},
-            {rentPerHour: {$gte: rentPerHour[0]}},
-            // {name: {$regex : name}} //case sensitive
-            {name: new RegExp(name, 'i') } //case insensitive
-          ]
+    try {
+        const {name, rentPerHour} = req.body
+        const cars = await Car.find({
+            $and: [
+                {rentPerHour: {$lte: rentPerHour[1]}},
+                {rentPerHour: {$gte: rentPerHour[0]}},
+                // {name: {$regex : name}} //case sensitive
+                {name: new RegExp(name, 'i')} //case insensitive
+            ]
         });
-    res.send(cars);
-  } catch (error) {
-    return res.status(400).json(error);
-  }
+        res.send(cars);
+    } catch (error) {
+        return res.status(400).json(error);
+    }
 });
 
+//админ добавляет машину, у него уже будет на фронте предложенный ассортимент категорий и он выберет существующий,
+//и в бд в машине которую мы хотим добавить будет поле категория с ссылкой на сущность из таблицы категория
+//а где размещен офис если мы добавляем машины мы вносим улицу город страну тем самым якобы у нас там офис открылся
+
 router.post("/addcar", async (req, res) => {
-  try {
-    const {country,city,street, ...carInfo}=req.body
+    try {
+        const {country, city, street, category, ...carInfo} = req.body
 
-    const newlocation = new Location({country,city,street});
-    console.log(newlocation)
-    await newlocation.save();
+        const currentcategory = await Category.findOne({category: category});
 
-    const newcar = new Car({...carInfo, address: newlocation._id});
-    await newcar.save();
-    res.send("Car added successfully");
-  } catch (error) {
-    return res.status(400).json(error);
-  }
+
+        const address = await Location.findOne({country: country, city: city, street: street});
+        if (address) {
+            const newcar = new Car({...carInfo, category: currentcategory._id, address: address._id});
+            await newcar.save();
+            res.send("Car added successfully");
+        } else {
+
+            const newlocation = new Location({country, city, street});
+            await newlocation.save();
+
+            const newcar = new Car({...carInfo, address: newlocation._id});
+            await newcar.save();
+            res.send("Car added successfully");
+        }
+
+    } catch (error) {
+        return res.status(400).json(error);
+    }
+});
+
+
+//админ может добавить категории с описанием
+router.post("/addcategory", async (req, res) => {
+    try {
+
+        const newCategory = new Category(req.body);
+        console.log(newCategory)
+        await newCategory.save();
+
+        res.send("Category added successfully");
+    } catch (error) {
+        return res.status(400).json(error);
+    }
 });
 
 router.post("/editcar", async (req, res) => {
-  try {
-    const car = await Car.findOne({ _id: req.body._id });
-    car.name = req.body.name;
-    car.image = req.body.image;
-    car.fuelType = req.body.fuelType;
-    car.rentPerHour = req.body.rentPerHour;
-    car.capacity = req.body.capacity;
+    try {
+        const car = await Car.findOne({_id: req.body._id});
+        car.name = req.body.name;
+        car.image = req.body.image;
+        car.fuelType = req.body.fuelType;
+        car.rentPerHour = req.body.rentPerHour;
+        car.capacity = req.body.capacity;
+        car.transmission = req.body.transmission;
+        car.engineCapacity = req.body.engineCapacity;
 
-    await car.save();
+        await car.save();
 
-    res.send("Car details updated successfully");
-  } catch (error) {
-    return res.status(400).json(error);
-  }
+        res.send("Car details updated successfully");
+    } catch (error) {
+        return res.status(400).json(error);
+    }
 });
 
 router.post("/deletecar", async (req, res) => {
-  try {
-    await Car.findOneAndDelete({ _id: req.body.carid });
+    try {
+        await Car.findOneAndDelete({_id: req.body.carid});
 
-    res.send("Car deleted successfully");
-  } catch (error) {
-    return res.status(400).json(error);
-  }
+        res.send("Car deleted successfully");
+    } catch (error) {
+        return res.status(400).json(error);
+    }
 });
 
 module.exports = router;

@@ -15,6 +15,35 @@ export const getAllCars=()=>async dispatch=>{
     }
 
 }
+export const getAllCategories=()=>async dispatch=>{
+
+    dispatch({type: 'LOADING' , payload:true})
+
+    try {
+        const response = await axios.get('/api/cars/getallcategories')
+        dispatch({type: 'GET_ALL_CATEGORIES', payload:response.data})
+        dispatch({type: 'LOADING' , payload:false})
+    } catch (error) {
+        console.log(error)
+        dispatch({type: 'LOADING' , payload:false})
+    }
+
+}
+
+export const findCarsInCategory=(values)=>async dispatch=>{
+
+    dispatch({type: 'LOADING' , payload:true})
+
+    try {
+        const response = await axios.post('/api/cars/findcarsincategory', values)
+        dispatch({type: 'GET_FILTERED_CARS_IN_CATEGORY', payload:response.data})
+        dispatch({type: 'LOADING' , payload:false})
+    } catch (error) {
+        console.log(error)
+        dispatch({type: 'LOADING' , payload:false})
+    }
+
+}
 
 
 export const getFilteredCars=(values)=>async dispatch=>{
@@ -31,6 +60,28 @@ export const getFilteredCars=(values)=>async dispatch=>{
     }
 
 }
+
+
+export const addCategory=(reqObj)=>async dispatch=>{
+
+    dispatch({type: 'LOADING' , payload:true})
+
+    try {
+        await axios.post('/api/cars/addcategory' , reqObj)
+
+        dispatch({type: 'LOADING' , payload:false})
+        message.success('New category added successfully')
+        setTimeout(() => {
+            window.location.href='/admin'
+        }, 500);
+    } catch (error) {
+        console.log(error)
+        dispatch({type: 'LOADING' , payload:false})
+    }
+
+
+}
+
 
 export const addCar=(reqObj)=>async dispatch=>{
 

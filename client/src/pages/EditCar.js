@@ -77,6 +77,12 @@ function EditCar({ match }) {
               >
                 <Input />
               </Form.Item>
+              <Form.Item name='transmission' label='Transmission' rules={[{required: true}]}>
+                <Input/>
+              </Form.Item>
+              <Form.Item name='engineCapacity' label='Engine Capacity' rules={[{required: true}]}>
+                <Input/>
+              </Form.Item>
 
               <div className="text-right">
                 <button className="btn1">Edit CAR</button>

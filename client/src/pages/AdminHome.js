@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 import {useSelector, useDispatch} from "react-redux";
 import DefaultLayout from "../components/DefaultLayout";
-import {deleteCar, getAllCars} from "../redux/actions/carsActions";
+import {deleteCar, getAllCars, getAllCategories} from "../redux/actions/carsActions";
 import {Col, Row, Divider, DatePicker, Checkbox, Edit} from "antd";
 import {Link} from "react-router-dom";
 import Spinner from "../components/Spinner";
@@ -19,6 +19,7 @@ function AdminHome() {
 
     useEffect(() => {
         dispatch(getAllCars());
+        dispatch(getAllCategories());
     }, []);
 
     useEffect(() => {
@@ -31,9 +32,12 @@ function AdminHome() {
         <DefaultLayout>
             <Row justify="center" gutter={16} className="mt-2">
                 <Col lg={20} sm={24}>
-                    <div className="d-flex justify-content-end align-items-center">
+                    <div className="d-flex justify-content-between align-items-center">
                         <button className="btn1">
                             <a href="/addcar">ADD CAR</a>
+                        </button>
+                        <button className="btn1">
+                            <a href="/addcategory">ADD CATEGORY</a>
                         </button>
                     </div>
                 </Col>

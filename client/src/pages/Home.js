@@ -1,17 +1,19 @@
 import React, {useState, useEffect} from 'react'
 import {useSelector, useDispatch} from 'react-redux'
 import DefaultLayout from '../components/DefaultLayout'
-import {getAllCars, getFilteredCars} from '../redux/actions/carsActions'
-import {Col, Row, Divider, DatePicker, Checkbox, Form, Input, Slider} from 'antd'
-import {Link} from 'react-router-dom'
+import {findCarsInCategory, getAllCars, getAllCategories} from '../redux/actions/carsActions'
+import {Col, Row, Divider, DatePicker, Form, Input, Slider, Select} from 'antd'
 import Spinner from '../components/Spinner';
 import moment from 'moment'
+import {Option} from "antd/es/mentions";
 
 const {RangePicker} = DatePicker
 
 function Home() {
+    const {categories} = useSelector((state) => state.carsReducer);
     const {cars} = useSelector(state => state.carsReducer)
     const {filteredCars} = useSelector(state => state.carsReducer)
+    const {filteredCarsInCategory} = useSelector(state => state.carsReducer)
     const {loading} = useSelector(state => state.alertsReducer)
     const [totalCars, setTotalcars] = useState([])
     const [maxRentPerHour, setMaxRentPerHour] = useState(0)
@@ -30,6 +32,11 @@ function Home() {
         dispatch(getAllCars())
     }, [])
 
+
+    useEffect(() => {
+        dispatch(getAllCategories());
+    }, []);
+
     useEffect(() => {
 
         setTotalcars(cars)
@@ -44,7 +51,24 @@ function Home() {
 
     }, [filteredCars])
 
+    useEffect(() => {
+
+        setTotalcars(filteredCarsInCategory)
+
+    }, [filteredCarsInCategory])
+
     let currentUser = JSON.parse(localStorage.getItem("user"))._id
+
+    if (categories) {
+        var categoriesOptions = categories.map(c => {
+            return {label: c.category.toUpperCase(), value: c.category}
+        })
+    }
+
+    // function onChangeCategory(e){
+    //     dispatch(findCarsInCategory(e.target.value))
+    // }
+
 
     function setFilter(values) {
 
@@ -77,15 +101,18 @@ function Home() {
 
         }
 
-
         setTotalcars(temp)
-
 
     }
 
     function setMyFilter(values) {
         console.log(values)
-        dispatch(getFilteredCars(values))
+        // dispatch(getFilteredCars(values))
+    }
+
+    function findByCategory(values) {
+        console.log(values)
+         dispatch(findCarsInCategory(values))
     }
 
 
@@ -95,9 +122,9 @@ function Home() {
                 <Col lg={20} sm={24} xs={24}>
                     <Row className="mt-3 " justify='space-between'>
 
-                        <Col lg={12} sm={24} >
+                        <Col lg={12} sm={24}>
 
-                            <Form initialValues={{ rentPerHour: [0, 20]}} layout='vertical' onFinish={setMyFilter}>
+                            <Form initialValues={{rentPerHour: [0, 20]}} layout='vertical' onFinish={setMyFilter}>
 
                                 <Form.Item name='rentPerHour' label='rent Per Hour'
                                            rules={[
@@ -107,13 +134,13 @@ function Home() {
                                                },
                                            ]}
                                 >
-                                    <Slider  range min={0} max={maxRentPerHour}/>
+                                    <Slider range min={0} max={maxRentPerHour}/>
                                 </Form.Item>
 
                                 <Form.Item name='name' label='Name of Car'
                                            rules={[
                                                {
-                                                   required: true,
+                                                   // required: true,
                                                    message: 'Please input name of car',
                                                },
                                            ]}
@@ -127,14 +154,39 @@ function Home() {
 
                         </Col>
 
-                        <Col lg={12} sm={24} >
-                            <Row justify='end'>
-                            <RangePicker showTime={{format: 'HH:mm'}} format='MMM DD yyyy HH:mm' onChange={setFilter}/>
+                        <Col lg={12} sm={24}>
+                            <Row gutter={[24, 48]} justify='end'>
+                                <Col>
+                                    <RangePicker showTime={{format: 'HH:mm'}} format='MMM DD yyyy HH:mm'
+                                                 onChange={setFilter}/>
+                                </Col>
+                                <Col>
+                                    <Form  onFinish={findByCategory}>
+                                        <Form.Item name='categories' label='Category'
+                                                   rules={[
+                                                       {
+                                                           required: true,
+                                                           message: 'Please input name of car',
+                                                       },
+                                                   ]}
+                                        >
+                                            <Select
+                                                mode="multiple"
+                                                style={{width: '100%'}}
+                                                allowClear
+                                                placeholder="Please select"
+                                            >
+                                                {categories.map(c => <Option key={c.category}>{c.category}</Option>)}
+                                            </Select>
+                                        </Form.Item>
+                                        <button className='btn1 mt-2'>Find By Category</button>
+                                    </Form>
+                                </Col>
                             </Row>
                         </Col>
-
                     </Row>
                 </Col>
+
             </Row>
 
 
@@ -142,7 +194,7 @@ function Home() {
 
             <Row justify='center' gutter={64}>
 
-                {totalCars.filter(car => car.user !== currentUser).map(car => {
+                {totalCars.map(car => {
                     return <Col lg={5} sm={24} xs={24}>
                         <div className="car p-2 bs1">
                             <img src={car.image} className="carimg"/>
@@ -155,7 +207,8 @@ function Home() {
                                 </div>
 
                                 <div>
-                                    <button className="btn1 mr-1"><a className={'viewDetails'} href={`/booking/${car._id}`}>View details</a>
+                                    <button className="btn1 mr-1"><a className={'viewDetails'}
+                                                                     href={`/booking/${car._id}`}>View details</a>
                                     </button>
                                 </div>
 
@@ -163,7 +216,7 @@ function Home() {
                         </div>
                     </Col>
                 })}
-                {totalCars.length===0 && <h1>No cars found</h1>}
+                {totalCars.length === 0 && <h1>No cars found</h1>}
 
             </Row>
 

@@ -12,6 +12,7 @@ import AdminHome from './pages/AdminHome';
 import EditCar from './pages/EditCar';
 import {Reviews} from "./pages/Reviews";
 import AddReview from "./pages/AddReview";
+import AddCategory from "./pages/AddCategory";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
              <ProtectedRoute path='/booking/:carid' exact component={BookingCar} />
              <ProtectedRoute path='/userbookings' exact component={UserBookings} />
              <ProtectedRoute path='/addcar' exact component={AddCar} />
+             <ProtectedRoute path='/addcategory' exact component={AddCategory} />
              <ProtectedRoute path='/editcar/:carid' exact component={EditCar} />
              <ProtectedRoute path='/admin' exact component={AdminHome} />
              <Route path='/reviews' exact component={Reviews} />

@@ -1,14 +1,25 @@
 import {Col, Row, Form, Input} from 'antd'
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import {useDispatch, useSelector} from 'react-redux'
 import DefaultLayout from '../components/DefaultLayout'
 import Spinner from '../components/Spinner'
-import {addCar} from '../redux/actions/carsActions'
+import {addCar, getAllCars, getAllCategories} from '../redux/actions/carsActions'
+import Radio from "antd/es/radio/radio";
 
 function AddCar() {
+    const {categories} = useSelector((state) => state.carsReducer);
+    const {loading} = useSelector((state) => state.alertsReducer);
+    const [totalCategories, setTotalCategories] = useState([]);
+    const dispatch = useDispatch();
 
-    const dispatch = useDispatch()
-    const {loading} = useSelector(state => state.alertsReducer)
+    useEffect(() => {
+        dispatch(getAllCategories());
+    }, []);
+
+    useEffect(() => {
+        setTotalCategories(categories);
+    }, [categories]);
+
 
     function onFinish(values) {
         values.bookedTimeSlots = []
@@ -18,9 +29,12 @@ function AddCar() {
         console.log(carObj)
     }
 
+    console.log(categories)
+
     return (
         <DefaultLayout>
             {loading && (<Spinner/>)}
+
             <Row justify='center mt-5'>
                 <Col lg={12} sm={24} xs={24} className='p-2'>
                     <Form className='bs1 p-2' layout='vertical' onFinish={onFinish}>
@@ -56,6 +70,12 @@ function AddCar() {
                         <Form.Item name='street' label='street' rules={[{required: true}]}>
                             <Input/>
                         </Form.Item>
+                        <Form.Item name='category'>
+                            <Radio.Group>
+                                {categories.map(c => <Radio value={c.category}>{c.category}</Radio>)}
+                            </Radio.Group>
+                        </Form.Item>
+
 
                         <div className='text-right'>
                             <button className='btn1'>ADD CAR</button>

@@ -69,7 +69,7 @@ function BookingCar({match}) {
         dispatch(bookCar(reqObj));
     }
 
-    // console.log(car)
+     console.log(car)
 
     return (
         <DefaultLayout>
@@ -91,10 +91,10 @@ function BookingCar({match}) {
                         </div>
 
                     </Carousel>
-                    {/*<div>*/}
-                    {/*    <p>Address: {car?.address[0]?.city}, {car.address[0]?.country}</p>*/}
-                    {/*    <p>{car?.address[0]?.street}</p>*/}
-                    {/*</div>*/}
+                    {car.address && <div>
+                        <p>Address: {car?.address[0]?.city}, {car?.address[0]?.country}</p>
+                        <p>{car?.address[0]?.street}</p>
+                    </div>}
                     {/*<img src={car.image} className="carimg2 bs1 w-100" data-aos='flip-left' data-aos-duration='1500'/>*/}
                 </Col>
 

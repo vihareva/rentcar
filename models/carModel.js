@@ -17,6 +17,7 @@ const carSchema = new mongoose.Schema({
         transmission: {type: String, required: true},
         engineCapacity: {type: Number, required: true},
         address:{type: mongoose.Schema.Types.ObjectID, ref: 'locations'},
+        category:{type: mongoose.Schema.Types.ObjectID, ref: 'category'},
 
     }, {timestamps: true}
 )
