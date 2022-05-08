@@ -2,7 +2,8 @@ const initialData = {
     cars: [],
     filteredCars: [],
     filteredCarsInCategory: [],
-    categories:[]
+    categories:[],
+    locations:[]
 };
 
 export const carsReducer = (state = initialData, action) => {
@@ -18,6 +19,13 @@ export const carsReducer = (state = initialData, action) => {
             return {
                 ...state,
                 categories: action.payload
+            }
+        }
+
+        case 'GET_ALL_LOCATIONS' : {
+            return {
+                ...state,
+                locations: action.payload
             }
         }
 

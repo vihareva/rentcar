@@ -25,8 +25,6 @@ function BookingCar({match}) {
     const [totalAmount, setTotalAmount] = useState(0);
     const [showModal, setShowModal] = useState(false);
 
-
-
     useEffect(() => {
         console.log(cars)
 

@@ -1,16 +1,24 @@
 import React, {useState, useEffect} from 'react'
 import {useSelector, useDispatch} from 'react-redux'
 import DefaultLayout from '../components/DefaultLayout'
-import {findCarsInCategory, getAllCars, getAllCategories} from '../redux/actions/carsActions'
-import {Col, Row, Divider, DatePicker, Form, Input, Slider, Select} from 'antd'
+import {
+    findCarsInCategory,
+    getAllCars,
+    getAllCategories,
+    getAllLocations,
+    getFilteredCars
+} from '../redux/actions/carsActions'
+import {Col, Row, Divider, DatePicker, Form, Input, Slider, Select, Tooltip, Card} from 'antd'
 import Spinner from '../components/Spinner';
 import moment from 'moment'
 import {Option} from "antd/es/mentions";
+import { Radio } from 'antd';
 
 const {RangePicker} = DatePicker
 
 function Home() {
     const {categories} = useSelector((state) => state.carsReducer);
+    const {locations} = useSelector((state) => state.carsReducer);
     const {cars} = useSelector(state => state.carsReducer)
     const {filteredCars} = useSelector(state => state.carsReducer)
     const {filteredCarsInCategory} = useSelector(state => state.carsReducer)
@@ -35,6 +43,10 @@ function Home() {
 
     useEffect(() => {
         dispatch(getAllCategories());
+    }, []);
+
+    useEffect(() => {
+        dispatch(getAllLocations());
     }, []);
 
     useEffect(() => {
@@ -107,12 +119,12 @@ function Home() {
 
     function setMyFilter(values) {
         console.log(values)
-        // dispatch(getFilteredCars(values))
+        dispatch(getFilteredCars(values))
     }
 
-    function findByCategory(values) {
+    function findByAddress(values) {
         console.log(values)
-         dispatch(findCarsInCategory(values))
+         // dispatch(findCarsInAddress(values))
     }
 
 
@@ -124,15 +136,15 @@ function Home() {
 
                         <Col lg={12} sm={24}>
 
-                            <Form initialValues={{rentPerHour: [0, 20]}} layout='vertical' onFinish={setMyFilter}>
+                            <Form  layout='vertical' onFinish={setMyFilter}>
 
                                 <Form.Item name='rentPerHour' label='rent Per Hour'
-                                           rules={[
-                                               {
-                                                   required: true,
-                                                   message: 'Please input name of car',
-                                               },
-                                           ]}
+                                           // rules={[
+                                           //     {
+                                           //         required: true,
+                                           //         message: 'Please enter a  rent Per Hour range ',
+                                           //     },
+                                           // ]}
                                 >
                                     <Slider range min={0} max={maxRentPerHour}/>
                                 </Form.Item>
@@ -148,6 +160,18 @@ function Home() {
                                     <Input/>
                                 </Form.Item>
 
+                                <Form.Item name='categories' label='Category'
+                                >
+                                    <Select
+                                        mode="multiple"
+                                        style={{width: '100%'}}
+                                        allowClear
+                                        placeholder="Please select"
+                                    >
+                                        {categories.map(c => <Option  title={c.description}  key={c.category}>{c.category}</Option>)}
+                                    </Select>
+                                </Form.Item>
+
                                 <button className='btn1 mt-2'>Filter</button>
                             </Form>
 
@@ -161,26 +185,17 @@ function Home() {
                                                  onChange={setFilter}/>
                                 </Col>
                                 <Col>
-                                    <Form  onFinish={findByCategory}>
-                                        <Form.Item name='categories' label='Category'
-                                                   rules={[
-                                                       {
-                                                           required: true,
-                                                           message: 'Please input name of car',
-                                                       },
-                                                   ]}
-                                        >
-                                            <Select
-                                                mode="multiple"
-                                                style={{width: '100%'}}
-                                                allowClear
-                                                placeholder="Please select"
-                                            >
-                                                {categories.map(c => <Option key={c.category}>{c.category}</Option>)}
-                                            </Select>
-                                        </Form.Item>
-                                        <button className='btn1 mt-2'>Find By Category</button>
-                                    </Form>
+                                        <Card title="Choose address you want to pick up car from" style={{ width: 400 }}>
+                                            <Form onFinish={findByAddress}>
+                                                <Form.Item name='address' label='Location'
+                                                >
+                                                    <Radio.Group>
+                                                        {locations.map(l =><Radio value={l._id}>{`${l.country} , ${l.city} : ${l.street}`}</Radio>)}
+                                                    </Radio.Group>
+                                                </Form.Item>
+                                                <button className='btn1 mt-2'>Filter</button>
+                                            </Form>
+                                        </Card>
                                 </Col>
                             </Row>
                         </Col>

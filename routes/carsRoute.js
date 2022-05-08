@@ -25,6 +25,108 @@ router.get("/getallcars", async (req, res) => {
     }
 });
 
+router.post("/filter", async (req, res) => {
+    try {
+        let queryCategories = req.body.categories
+        let queryName = req.body.name
+        let queryRentPerHour = req.body.rentPerHour
+
+        if(queryName===' '){
+            queryName=null
+        }
+
+        //варианты где  в запросе есть все фильтры
+        if (queryCategories && queryName && queryRentPerHour) {
+            const categories = await Category.find({category: {$in: queryCategories}})
+            console.log(categories)
+            const cars = await Car.find({
+                $and: [
+                    {category: {$in: categories.map(c => c._id)}},
+                    {name: new RegExp(queryName, 'i')},
+                    {rentPerHour: {$lte: queryRentPerHour[1]}},
+                    {rentPerHour: {$gte: queryRentPerHour[0]}},
+                ]
+            })
+            res.send(cars);
+            console.log(cars);
+        }
+
+//варианты где  в запросе есть категории(сортируем только по имени или только по цене или обоим)
+        if (queryCategories && !queryName && !queryRentPerHour) {
+            const categories = await Category.find({category: {$in: queryCategories}})
+            console.log(categories)
+            const cars = await Car.find({category: {$in: categories.map(c => c._id)}}).sort({rentPerHour: 1})
+            console.log(cars);
+            res.send(cars);
+        }
+
+        if (queryCategories && queryName && !queryRentPerHour) {
+            const categories = await Category.find({category: {$in: queryCategories}})
+            console.log(categories)
+            const cars = await Car.find({
+                $and: [
+                    {category: {$in: categories.map(c => c._id)}},
+                    {name: new RegExp(queryName, 'i')}
+                ]
+            })
+            console.log(cars);
+            res.send(cars);
+        }
+
+        if (queryCategories && !queryName && queryRentPerHour) {
+            const categories = await Category.find({category: {$in: queryCategories}})
+            console.log(categories)
+            const cars = await Car.find({
+                $and: [
+                    {category: {$in: categories.map(c => c._id)}},
+                    {rentPerHour: {$lte: queryRentPerHour[1]}},
+                    {rentPerHour: {$gte: queryRentPerHour[0]}},
+                ]
+            })
+            console.log(cars);
+            res.send(cars);
+        }
+
+
+//варианты где нет в запросе категории(сортируем только по имени или только по цене или обоим)
+        if (!queryCategories && queryName && queryRentPerHour) {
+            const cars = await Car.find({
+                $and: [
+                    {rentPerHour: {$lte: queryRentPerHour[1]}},
+                    {rentPerHour: {$gte: queryRentPerHour[0]}},
+                    // {name: {$regex : name}} //case sensitive
+                    {name: new RegExp(queryName, 'i')} //case insensitive
+                ]
+            });
+              console.log(cars);
+            res.send(cars);
+        }
+
+        if (!queryCategories && !queryName && queryRentPerHour) {
+            const cars = await Car.find({
+                $and: [
+                    {rentPerHour: {$lte: queryRentPerHour[1]}},
+                    {rentPerHour: {$gte: queryRentPerHour[0]}},
+                ]
+            });
+            console.log(cars);
+            res.send(cars);
+        }
+
+        if (!queryCategories && queryName && !queryRentPerHour) {
+            const cars = await Car.find({
+                name: new RegExp(queryName, 'i') //case insensitive
+            });
+            console.log(cars);
+            res.send(cars);
+        }
+
+    } catch (error) {
+        return res.status(400).json(error);
+    }
+
+});
+
 router.get("/getallcategories", async (req, res) => {
     try {
         const categories = await Category.find();
@@ -36,12 +138,22 @@ router.get("/getallcategories", async (req, res) => {
     }
 });
 
+router.get("/getalllocations", async (req, res) => {
+    try {
+        const locations = await Location.find();
+        res.send(locations);
+        console.log(locations)
+
+    } catch (error) {
+        return res.status(400).json(error);
+    }
+});
+
 router.post("/findcarsincategory", async (req, res) => {
     try {
         const categories = await Category.find({category: {$in: req.body.categories}})
         console.log(categories)
-        const cars = await Car.find({category: {$in: categories.map(c => c._id)}})
-        console.log(cars)
+        const cars = await Car.find({category: {$in: categories.map(c => c._id)}}).sort({rentPerHour: 1})
         res.send(cars);
     } catch (error) {
         return res.status(400).json(error);

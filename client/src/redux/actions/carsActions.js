@@ -30,6 +30,21 @@ export const getAllCategories=()=>async dispatch=>{
 
 }
 
+export const getAllLocations=()=>async dispatch=>{
+
+    dispatch({type: 'LOADING' , payload:true})
+
+    try {
+        const response = await axios.get('/api/cars/getalllocations')
+        dispatch({type: 'GET_ALL_LOCATIONS', payload:response.data})
+        dispatch({type: 'LOADING' , payload:false})
+    } catch (error) {
+        console.log(error)
+        dispatch({type: 'LOADING' , payload:false})
+    }
+
+}
+
 export const findCarsInCategory=(values)=>async dispatch=>{
 
     dispatch({type: 'LOADING' , payload:true})
@@ -51,7 +66,7 @@ export const getFilteredCars=(values)=>async dispatch=>{
     dispatch({type: 'LOADING' , payload:true})
 
     try {
-        const response = await axios.post('/api/cars/getfilteredcars', values )
+        const response = await axios.post('/api/cars/filter', values )
         dispatch({type: 'GET_FILTERED_CARS', payload:response.data})
         dispatch({type: 'LOADING' , payload:false})
     } catch (error) {
