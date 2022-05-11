@@ -45,13 +45,13 @@ export const getAllLocations=()=>async dispatch=>{
 
 }
 
-export const findCarsInCategory=(values)=>async dispatch=>{
+export const findCarsInAddress=(values)=>async dispatch=>{
 
     dispatch({type: 'LOADING' , payload:true})
 
     try {
-        const response = await axios.post('/api/cars/findcarsincategory', values)
-        dispatch({type: 'GET_FILTERED_CARS_IN_CATEGORY', payload:response.data})
+        const response = await axios.post('/api/cars/findcarsinaddress', values)
+        dispatch({type: 'GET_FILTERED_CARS_IN_ADDRESS', payload:response.data})
         dispatch({type: 'LOADING' , payload:false})
     } catch (error) {
         console.log(error)

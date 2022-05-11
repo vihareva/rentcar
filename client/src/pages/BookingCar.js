@@ -1,4 +1,4 @@
-import {Col, Row, Divider, DatePicker, Checkbox, Modal} from "antd";
+import {Col, Row, Divider, DatePicker, Checkbox, Modal, Popover} from "antd";
 import React, {useState, useEffect} from "react";
 import {useSelector, useDispatch} from "react-redux";
 import DefaultLayout from "../components/DefaultLayout";
@@ -10,7 +10,7 @@ import StripeCheckout from "react-stripe-checkout";
 import {Carousel} from 'antd';
 import AOS from 'aos';
 
-import 'aos/dist/aos.css'; // You can also use <link> for styles
+import 'aos/dist/aos.css';
 const {RangePicker} = DatePicker;
 
 function BookingCar({match}) {
@@ -90,7 +90,7 @@ function BookingCar({match}) {
 
                     </Carousel>
                     {car.address && <div>
-                        <p>Address: {car?.address[0]?.city}, {car?.address[0]?.country}</p>
+                        <p><b>Address: </b>{car?.address[0]?.city}, {car?.address[0]?.country}</p>
                         <p>{car?.address[0]?.street}</p>
                     </div>}
                     {/*<img src={car.image} className="carimg2 bs1 w-100" data-aos='flip-left' data-aos-duration='1500'/>*/}
@@ -102,7 +102,14 @@ function BookingCar({match}) {
                     </Divider>
                     <div style={{textAlign: "right"}}>
                         <p className={'carnameinhomepages'}>{car.name}</p>
-                        <p>{car.rentPerHour} Rent Per hour /-</p>
+                        <p className={'rentPerHour'}>{car.rentPerHour} Rent Per hour /-</p>
+                        {car.category && <Popover overlayStyle={{width: "20vw"}}
+                                                  placement="bottom"
+                                                  title={car.category[0].category}
+                                                  content={car.category[0].description} >
+                            <p><span className={'headerSpan'}><b>Category :</b></span> <b>{car.category[0].category}</b> </p>
+                        </Popover>}
+
                         <p><span className={'headerSpan'}>Fuel Type :</span> {car.fuelType}</p>
                         <p><span className={'headerSpan'}>Transmission :</span> {car.transmission}</p>
                         <p><span className={'headerSpan'}>Max Persons :</span> {car.capacity}</p>

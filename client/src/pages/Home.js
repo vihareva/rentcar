@@ -2,13 +2,14 @@ import React, {useState, useEffect} from 'react'
 import {useSelector, useDispatch} from 'react-redux'
 import DefaultLayout from '../components/DefaultLayout'
 import {
+    findCarsInAddress,
     findCarsInCategory,
     getAllCars,
     getAllCategories,
     getAllLocations,
     getFilteredCars
 } from '../redux/actions/carsActions'
-import {Col, Row, Divider, DatePicker, Form, Input, Slider, Select, Tooltip, Card} from 'antd'
+import {Col, Row, Divider, DatePicker, Form, Input, Slider, Select, Tooltip, Card, Space} from 'antd'
 import Spinner from '../components/Spinner';
 import moment from 'moment'
 import {Option} from "antd/es/mentions";
@@ -21,7 +22,7 @@ function Home() {
     const {locations} = useSelector((state) => state.carsReducer);
     const {cars} = useSelector(state => state.carsReducer)
     const {filteredCars} = useSelector(state => state.carsReducer)
-    const {filteredCarsInCategory} = useSelector(state => state.carsReducer)
+    const {filteredCarsInAddress} = useSelector(state => state.carsReducer)
     const {loading} = useSelector(state => state.alertsReducer)
     const [totalCars, setTotalcars] = useState([])
     const [maxRentPerHour, setMaxRentPerHour] = useState(0)
@@ -38,16 +39,20 @@ function Home() {
 
     useEffect(() => {
         dispatch(getAllCars())
+        dispatch(getAllCategories());
+        dispatch(getAllLocations());
+        if(JSON.parse(localStorage.getItem('address'))){
+            localStorage.removeItem('address')
+        }
     }, [])
 
-
-    useEffect(() => {
-        dispatch(getAllCategories());
-    }, []);
-
-    useEffect(() => {
-        dispatch(getAllLocations());
-    }, []);
+    //
+    // useEffect(() => {
+    //     dispatch(getAllCategories());
+    // }, []);
+    // useEffect(() => {
+    //     dispatch(getAllLocations());
+    // }, []);
 
     useEffect(() => {
 
@@ -65,21 +70,9 @@ function Home() {
 
     useEffect(() => {
 
-        setTotalcars(filteredCarsInCategory)
+        setTotalcars(filteredCarsInAddress)
 
-    }, [filteredCarsInCategory])
-
-    let currentUser = JSON.parse(localStorage.getItem("user"))._id
-
-    if (categories) {
-        var categoriesOptions = categories.map(c => {
-            return {label: c.category.toUpperCase(), value: c.category}
-        })
-    }
-
-    // function onChangeCategory(e){
-    //     dispatch(findCarsInCategory(e.target.value))
-    // }
+    }, [filteredCarsInAddress])
 
 
     function setFilter(values) {
@@ -119,12 +112,15 @@ function Home() {
 
     function setMyFilter(values) {
         console.log(values)
-        dispatch(getFilteredCars(values))
+        const filterWithAddress={...values, address: JSON.parse(localStorage.getItem('address'))}
+        console.log(filterWithAddress)
+        dispatch(getFilteredCars(filterWithAddress))
     }
 
     function findByAddress(values) {
         console.log(values)
-         // dispatch(findCarsInAddress(values))
+        localStorage.setItem('address', JSON.stringify(values))
+         dispatch(findCarsInAddress(values))
     }
 
 
@@ -187,10 +183,12 @@ function Home() {
                                 <Col>
                                         <Card title="Choose address you want to pick up car from" style={{ width: 400 }}>
                                             <Form onFinish={findByAddress}>
-                                                <Form.Item name='address' label='Location'
+                                                <Form.Item name='addressID' label='Location'
                                                 >
-                                                    <Radio.Group>
+                                                    <Radio.Group >
+                                                        <Space direction="vertical">
                                                         {locations.map(l =><Radio value={l._id}>{`${l.country} , ${l.city} : ${l.street}`}</Radio>)}
+                                                        </Space>
                                                     </Radio.Group>
                                                 </Form.Item>
                                                 <button className='btn1 mt-2'>Filter</button>
