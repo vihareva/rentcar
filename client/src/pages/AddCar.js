@@ -6,6 +6,7 @@ import Spinner from '../components/Spinner'
 import {addCar, getAllCars, getAllCategories} from '../redux/actions/carsActions'
 import Radio from "antd/es/radio/radio";
 
+
 function AddCar() {
     const {categories} = useSelector((state) => state.carsReducer);
     const {loading} = useSelector((state) => state.alertsReducer);
@@ -23,7 +24,7 @@ function AddCar() {
 
     function onFinish(values) {
         values.bookedTimeSlots = []
-        let carObj = {...values, user: JSON.parse(localStorage.getItem("user"))._id}
+        let carObj = {...values}
 
         dispatch(addCar(carObj))
         console.log(carObj)
@@ -43,24 +44,28 @@ function AddCar() {
                         <Form.Item name='name' label='Car name' rules={[{required: true}]}>
                             <Input/>
                         </Form.Item>
-                        <Form.Item name='image' label='Image url' rules={[{required: true}]}>
-                            <Input/>
-                        </Form.Item>
-                        <Form.Item name='rentPerHour' label='Rent per hour' rules={[{required: true}]}>
-                            <Input/>
-                        </Form.Item>
-                        <Form.Item name='capacity' label='Capacity' rules={[{required: true}]}>
-                            <Input/>
-                        </Form.Item>
-                        <Form.Item name='fuelType' label='Fuel Type' rules={[{required: true}]}>
-                            <Input/>
-                        </Form.Item>
-                        <Form.Item name='transmission' label='Transmission' rules={[{required: true}]}>
-                            <Input/>
-                        </Form.Item>
-                        <Form.Item name='engineCapacity' label='Engine Capacity' rules={[{required: true}]}>
-                            <Input/>
-                        </Form.Item>
+                        <div style={{display:'flex', justifyContent:'space-around' }}>
+                            <div><Form.Item name='image' label='Image url' rules={[{required: true}]}>
+                                <Input/>
+                            </Form.Item>
+                                <Form.Item name='rentPerHour' label='Rent per hour' rules={[{required: true}]}>
+                                    <Input/>
+                                </Form.Item>
+                                <Form.Item name='capacity' label='Capacity' rules={[{required: true}]}>
+                                    <Input/>
+                                </Form.Item>
+                            </div>
+                            <div> <Form.Item name='transmission' label='Transmission' rules={[{required: true}]}>
+                                <Input/>
+                            </Form.Item>
+                                <Form.Item name='fuelType' label='Fuel Type' rules={[{required: true}]}>
+                                    <Input/>
+                                </Form.Item>
+                                <Form.Item name='engineCapacity' label='Engine Capacity' rules={[{required: true}]}>
+                                    <Input/>
+                                </Form.Item>
+                            </div>
+                        </div>
                         <Form.Item name='country' label='country' rules={[{required: true}]}>
                             <Input/>
                         </Form.Item>
@@ -70,6 +75,8 @@ function AddCar() {
                         <Form.Item name='street' label='street' rules={[{required: true}]}>
                             <Input/>
                         </Form.Item>
+
+
                         <Form.Item name='category'>
                             <Radio.Group>
                                 {categories.map(c => <Radio value={c.category}>{c.category}</Radio>)}

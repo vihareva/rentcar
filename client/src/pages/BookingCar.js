@@ -102,7 +102,7 @@ function BookingCar({match}) {
                     </Divider>
                     <div style={{textAlign: "right"}}>
                         <p className={'carnameinhomepages'}>{car.name}</p>
-                        <p className={'rentPerHour'}>{car.rentPerHour} Rent Per hour /-</p>
+                        <p className={'rentPerHour'}>{car.rentPerHour} $ Per hour /-</p>
                         {car.category && <Popover overlayStyle={{width: "20vw"}}
                                                   placement="bottom"
                                                   title={car.category[0].category}
@@ -139,21 +139,21 @@ function BookingCar({match}) {
                                 Total Hours : <b>{totalHours}</b>
                             </p>
                             <p>
-                                Rent Per Hour : <b>{car.rentPerHour}</b>
+                                Rent Per Hour : <b>{car.rentPerHour} $</b>
                             </p>
-                            <Checkbox
-                                onChange={(e) => {
-                                    if (e.target.checked) {
-                                        setdriver(true);
-                                    } else {
-                                        setdriver(false);
-                                    }
-                                }}
-                            >
-                                Driver Required
-                            </Checkbox>
+                            {/*<Checkbox*/}
+                            {/*    onChange={(e) => {*/}
+                            {/*        if (e.target.checked) {*/}
+                            {/*            setdriver(true);*/}
+                            {/*        } else {*/}
+                            {/*            setdriver(false);*/}
+                            {/*        }*/}
+                            {/*    }}*/}
+                            {/*>*/}
+                            {/*    Driver Required*/}
+                            {/*</Checkbox>*/}
 
-                            <h3>Total Amount : {totalAmount}</h3>
+                            <h3>Total Amount : {totalAmount} $</h3>
 
                             <StripeCheckout
                                 shippingAddress
@@ -163,7 +163,7 @@ function BookingCar({match}) {
                                 stripeKey="pk_test_51KZNyDGfonS0kOfXU7atqutGlXnXtAH2zse6JU16iR8KXz5LZwGZGS4LgIAzOdMbgWL8bZIkx1kZWqYSE0CMRIQh00fpJTnKoe"
                             >
                                 <button className="btn1">
-                                    View details
+                                    Book a car
                                 </button>
                             </StripeCheckout>
 

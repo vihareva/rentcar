@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema({
-
             //СВЯЗИ В MONGODB
         car: {type: mongoose.Schema.Types.ObjectID, ref: 'cars'},
         user: {type: mongoose.Schema.Types.ObjectID, ref: 'users'},
@@ -13,9 +12,6 @@ const bookingSchema = new mongoose.Schema({
         totalAmount: {type: Number},
         transactionId: {type: String},
         driverRequired: {type: Boolean},
-
-
-
     },
     {timestamps: true}
 )

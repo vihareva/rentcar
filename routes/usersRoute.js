@@ -32,7 +32,7 @@ router.post("/register", async (req, res) => {
     try {
         //создаем новый объект user исходя из тех параметров что передаются с клиента
         //с помощью ключевого слова new обращаемся к модели User
-        const newuser = new User(req.body)
+        const newuser = new User({...req.body, isAdmin: false})
 
         //асинхронный метод, сохраняем модель
         await newuser.save()

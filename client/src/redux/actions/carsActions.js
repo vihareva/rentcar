@@ -1,5 +1,6 @@
 import { message } from 'antd';
 import axios from 'axios';
+import { saveAs } from 'file-saver'
 
 export const getAllCars=()=>async dispatch=>{
 
@@ -104,12 +105,15 @@ export const addCar=(reqObj)=>async dispatch=>{
 
     try {
          await axios.post('/api/cars/addcar' , reqObj)
-       
-         dispatch({type: 'LOADING' , payload:false})
-         message.success('New car added successfully')
+         .then(() => axios.get('/fetch-pdf', { responseType: 'blob' }))
+             .then((res) => {
+                 const pdfBlob = new Blob([res.data], { type: 'application/pdf' });
+
+                 saveAs(pdfBlob, 'newPdf.pdf');
+             })
          setTimeout(() => {
             window.location.href='/admin'
-         }, 500);
+         }, 1000);
     } catch (error) {
         console.log(error)
         dispatch({type: 'LOADING' , payload:false})

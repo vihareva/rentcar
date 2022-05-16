@@ -4,6 +4,12 @@ const Car = require("../models/carModel");
 const Location = require("../models/locationModel");
 const Category = require("../models/categoryModel");
 
+
+const pdf = require('html-pdf');
+
+
+const pdfTemplate = require('./documents');
+
 router.get("/getallcars", async (req, res) => {
     try {
         // const cars = await Car.find();
@@ -304,7 +310,6 @@ router.post("/addcar", async (req, res) => {
         if (address) {
             const newcar = new Car({...carInfo, category: currentcategory._id, address: address._id});
             await newcar.save();
-            res.send("Car added successfully");
         } else {
 
             const newlocation = new Location({country, city, street});
@@ -312,14 +317,24 @@ router.post("/addcar", async (req, res) => {
 
             const newcar = new Car({...carInfo, address: newlocation._id});
             await newcar.save();
-            res.send("Car added successfully");
         }
+
+        pdf.create(pdfTemplate(req.body), {}).toFile('result.pdf', (err) => {
+            if(err) {
+                res.send(Promise.reject());
+            }
+
+            res.send("Car added successfully");
+        });
 
     } catch (error) {
         return res.status(400).json(error);
     }
 });
 
+router.get('/fetch-pdf', (req, res) => {
+    res.sendFile(`${__dirname}/result.pdf`)
+})
 
 //админ может добавить категории с описанием
 router.post("/addcategory", async (req, res) => {

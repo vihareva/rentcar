@@ -4,6 +4,9 @@ const express = require('express')
 //объект нашего приложения(создали наше приложение)
 const app = express()
 
+const bodyParser = require('body-parser');
+const cors = require('cors');
+
 //на каком порту запускается всё приложение
 const port = process.env.PORT || 5000
 
@@ -20,8 +23,15 @@ app.use('/api/users/' , require('./routes/usersRoute'))
 app.use('/api/bookings/' , require('./routes/bookingsRoute'))
 app.use('/api/reviews/' , require('./routes/reviewsRoute'))
 
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 const path = require('path')
+
+app.get('/fetch-pdf', (req, res) => {
+    res.sendFile(`${__dirname}/result.pdf`)
+})
 
 if(process.env.NODE_ENV==='production')
 {

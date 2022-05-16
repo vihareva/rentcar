@@ -39,7 +39,7 @@ function AddReview() {
                         <hr/>
                         <Form.Item name='car' label='Car' rules={[{required: true}]}>
                             <Select style={{width: 120}}>
-                                {totalCars.filter(car => car.user !== currentUser).map(car => {
+                                {totalCars.map(car => {
                                     return <>
                                         <Option value={car._id}>{car.name}</Option>
                                         {/*<img src={car.image} className="carimg"/>*/}

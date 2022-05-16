@@ -22,14 +22,14 @@ function DefaultLayout(props) {
                     Bookings
                 </a>
             </Menu.Item>
-            <Menu.Item>
+            {user.isAdmin && <Menu.Item>
                 <a
 
                     href="/admin"
                 >
                     Admin
                 </a>
-            </Menu.Item>
+            </Menu.Item>}
             <Menu.Item>
                 <a
 
