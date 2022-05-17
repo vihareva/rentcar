@@ -1,6 +1,7 @@
 import React from "react";
 import {Menu, Dropdown, Button, Space, Row, Col} from "antd";
 import {Link} from 'react-router-dom'
+import {HeartFilled, HeartOutlined} from "@ant-design/icons";
 
 function DefaultLayout(props) {
     const user = JSON.parse(localStorage.getItem('user'))
@@ -30,6 +31,14 @@ function DefaultLayout(props) {
                     Admin
                 </a>
             </Menu.Item>}
+            <Menu.Item>
+                <a
+
+                    href="/saved"
+                >
+                   Saved cars
+                </a>
+            </Menu.Item>
             <Menu.Item>
                 <a
 

@@ -13,6 +13,7 @@ import EditCar from './pages/EditCar';
 import {Reviews} from "./pages/Reviews";
 import AddReview from "./pages/AddReview";
 import AddCategory from "./pages/AddCategory";
+import SavedCars from "./pages/SavedCars";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
              <ProtectedRoute path='/addcategory' exact component={AddCategory} />
              <ProtectedRoute path='/editcar/:carid' exact component={EditCar} />
              <ProtectedRoute path='/admin' exact component={AdminHome} />
+             <ProtectedRoute path='/saved' exact component={SavedCars} />
              <Route path='/reviews' exact component={Reviews} />
              <ProtectedRoute path='/addreview' exact component={AddReview} />
          </BrowserRouter>

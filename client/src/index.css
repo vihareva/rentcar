@@ -96,6 +96,7 @@ button{
   margin-top: 100px;
   height: 160px;
   transition: 0.3s;
+  min-width: 220px;
 }
 .car:hover{
   height :240px;

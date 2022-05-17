@@ -11,11 +11,14 @@ import {Carousel} from 'antd';
 import AOS from 'aos';
 
 import 'aos/dist/aos.css';
+import {HeartFilled, HeartOutlined} from "@ant-design/icons";
+
 const {RangePicker} = DatePicker;
 
 function BookingCar({match}) {
     const {cars} = useSelector((state) => state.carsReducer);
     const {loading} = useSelector((state) => state.alertsReducer);
+    const {savedCarsIds} = useSelector((state) => state.carsReducer);
     const [car, setcar] = useState({});
     const dispatch = useDispatch();
     const [from, setFrom] = useState();
@@ -35,6 +38,7 @@ function BookingCar({match}) {
         }
     }, [cars]);
 
+
     useEffect(() => {
         setTotalAmount(totalHours * car.rentPerHour);
         if (driver) {
@@ -42,11 +46,32 @@ function BookingCar({match}) {
         }
     }, [driver, totalHours]);
 
-    function selectTimeSlots(values) {
-        setFrom(moment(values[0]).format("MMM DD yyyy HH:mm"));
-        setTo(moment(values[1]).format("MMM DD yyyy HH:mm"));
+    let addToSaved = () => {
+        // //dispatch({''})
+        // //localStorage.setItem('userSaved', JSON.stringify(match.params.carid))
+        // let userSavedCars = JSON.parse(localStorage.getItem('userSaved'))
+        // if (userSavedCars) {
+        //     if(userSavedCars.every(c=>c!==match.params.carid)){
+        //         userSavedCars.push(match.params.carid)
+        //     }
+        //     localStorage.setItem('userSaved', JSON.stringify(userSavedCars))
+        // } else {
+        //     localStorage.setItem('userSaved', JSON.stringify([match.params.carid]))
+        // }
+        dispatch({type: 'ADD-SAVED-CAR-ID', payload: match.params.carid})
+    }
 
-        setTotalHours(values[1].diff(values[0], "hours"));
+    useEffect(()=>{
+        localStorage.setItem('userSaved', JSON.stringify(savedCarsIds))
+    }, [savedCarsIds])
+
+    function selectTimeSlots(values) {
+        if (values) {
+            setFrom(moment(values[0]).format("MMM DD yyyy HH:mm"));
+            setTo(moment(values[1]).format("MMM DD yyyy HH:mm"));
+
+            setTotalHours(values[1].diff(values[0], "hours"));
+        }
     }
 
 
@@ -67,7 +92,7 @@ function BookingCar({match}) {
         dispatch(bookCar(reqObj));
     }
 
-     console.log(car)
+    console.log(car)
 
     return (
         <DefaultLayout>
@@ -80,7 +105,7 @@ function BookingCar({match}) {
             >
                 <Col lg={10} sm={24} xs={24} className='p-3'>
 
-                    <Carousel effect={'fade'}>
+                    {/*<Carousel effect={'fade'}>*/}
                         <div>
                             <img src={car.image} className="carimg2 bs1 w-100"/>
                         </div>
@@ -88,11 +113,14 @@ function BookingCar({match}) {
                             <img src={car.image} className="carimg2 bs1 w-100"/>
                         </div>
 
-                    </Carousel>
+                    {/*</Carousel>*/}
                     {car.address && <div>
                         <p><b>Address: </b>{car?.address[0]?.city}, {car?.address[0]?.country}</p>
                         <p>{car?.address[0]?.street}</p>
                     </div>}
+                    <button className="btn1 mt-2" onClick={addToSaved}>
+                        { savedCarsIds.some(c=>c===match.params.carid)? <HeartFilled/>: <HeartOutlined/> }
+                    </button>
                     {/*<img src={car.image} className="carimg2 bs1 w-100" data-aos='flip-left' data-aos-duration='1500'/>*/}
                 </Col>
 
@@ -106,8 +134,9 @@ function BookingCar({match}) {
                         {car.category && <Popover overlayStyle={{width: "20vw"}}
                                                   placement="bottom"
                                                   title={car.category[0].category}
-                                                  content={car.category[0].description} >
-                            <p><span className={'headerSpan'}><b>Category :</b></span> <b>{car.category[0].category}</b> </p>
+                                                  content={car.category[0].description}>
+                            <p><span className={'headerSpan'}><b>Category :</b></span> <b>{car.category[0].category}</b>
+                            </p>
                         </Popover>}
 
                         <p><span className={'headerSpan'}>Fuel Type :</span> {car.fuelType}</p>

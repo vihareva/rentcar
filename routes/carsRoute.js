@@ -38,6 +38,20 @@ router.get("/getallcars", async (req, res) => {
     }
 });
 
+
+router.post("/getsavedcars", async (req, res) => {
+    try {
+        const cars = await Car.find({_id: {$in: req.body}});
+        res.send(cars);
+
+    } catch (error) {
+        return res.status(400).json(error);
+    }
+});
+
+
+
+
 router.post("/filter", async (req, res) => {
     try {
         let queryCategories = req.body.categories

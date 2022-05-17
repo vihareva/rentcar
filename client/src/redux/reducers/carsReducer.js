@@ -1,9 +1,11 @@
 const initialData = {
     cars: [],
-    filteredCars: [],
+    filteredCars:  [],
     filteredCarsInAddress: [],
     categories:[],
-    locations:[]
+    locations:[],
+    savedCarsIds:JSON.parse(localStorage.getItem('userSaved')) ||[],
+    savedCars:[]
 };
 
 export const carsReducer = (state = initialData, action) => {
@@ -41,6 +43,27 @@ export const carsReducer = (state = initialData, action) => {
                 ...state,
                 filteredCarsInAddress: action.payload
             }
+        }
+        case 'GET_SAVED_CARS' : {
+            return {
+                ...state,
+                savedCars: action.payload
+            }
+        }
+        case 'ADD-SAVED-CAR-ID' : {
+            //в массиве нет машины которую мы хотим добавить значит ее можно добавить
+            if (state.savedCarsIds.every(c => c !== action.payload)) {
+                return {
+                    ...state,
+                    savedCarsIds: [...state.savedCarsIds, action.payload]
+                }
+                //в массиве есть машина значит мы хотим удалить ее из избранных
+            } else if (state.savedCarsIds.some(c => c === action.payload)) {
+                return {
+                    ...state,
+                    savedCarsIds: state.savedCarsIds.filter(c=>c!==action.payload)
+                }
+            } else return state
         }
 
         default:

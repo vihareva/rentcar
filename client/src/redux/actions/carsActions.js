@@ -77,6 +77,20 @@ export const getFilteredCars=(values)=>async dispatch=>{
 
 }
 
+export const getSavedCars=(values)=>async dispatch=>{
+
+    dispatch({type: 'LOADING' , payload:true})
+
+    try {
+        const response = await axios.post('/api/cars/getsavedcars', values )
+        dispatch({type: 'GET_SAVED_CARS', payload:response.data})
+        dispatch({type: 'LOADING' , payload:false})
+    } catch (error) {
+        console.log(error)
+        dispatch({type: 'LOADING' , payload:false})
+    }
+
+}
 
 export const addCategory=(reqObj)=>async dispatch=>{
 
@@ -158,6 +172,5 @@ export const deleteCar=(reqObj)=>async dispatch=>{
         console.log(error)
         dispatch({type: 'LOADING' , payload:false})
     }
-      
 
 }
