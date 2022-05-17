@@ -49,6 +49,7 @@ function DefaultLayout(props) {
             </Menu.Item>
             <Menu.Item onClick={() => {
                 localStorage.removeItem('user');
+                localStorage.removeItem('userSaved');
                 window.location.href = '/login'
             }}>
                 <li style={{color: '#3D5974'}}>Logout</li>

@@ -24,7 +24,10 @@ function SavedCars() {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        dispatch(getSavedCars(JSON.parse(localStorage.getItem('userSaved'))))
+        let userSaved=JSON.parse(localStorage.getItem('userSaved'))
+        if(userSaved){
+            dispatch(getSavedCars(JSON.parse(localStorage.getItem('userSaved'))))
+        }else{setTotalcars([])}
         dispatch(getAllCategories());
         dispatch(getAllLocations());
         if (JSON.parse(localStorage.getItem('address'))) {
@@ -46,32 +49,33 @@ function SavedCars() {
 
                 <Row justify='center' gutter={64}>
                     <Row className="mt-3 " justify='space-between'>
-                    {totalCars&& totalCars.map(car => {
-                        return <Col lg={5} sm={24} xs={24}>
-                            <div className="car p-2 bs1">
-                                <img src={car.image} className="carimg"/>
+                        {totalCars.length!==0 ? totalCars.map(car => {
+                            return <Col lg={5} sm={24} xs={24}>
+                                <div className="car p-2 bs1">
+                                    <img src={car.image} className="carimg"/>
 
-                                <div className="car-content d-flex align-items-center justify-content-between">
+                                    <div className="car-content d-flex align-items-center justify-content-between">
 
-                                    <div className='text-left '>
-                                        <p className={'carnameinhomepages'}>{car.name}</p>
-                                        <p className={'rentPerHour'}> {car.rentPerHour} $/Hour</p>
+                                        <div className='text-left '>
+                                            <p className={'carnameinhomepages'}>{car.name}</p>
+                                            <p className={'rentPerHour'}> {car.rentPerHour} $/Hour</p>
+                                        </div>
+
+                                        <div>
+                                            <button className="btn1 mr-1"><a className={'viewDetails'}
+                                                                             href={`/booking/${car._id}`}>View
+                                                details</a>
+                                            </button>
+                                        </div>
+
                                     </div>
-
-                                    <div>
-                                        <button className="btn1 mr-1"><a className={'viewDetails'}
-                                                                         href={`/booking/${car._id}`}>View details</a>
-                                        </button>
-                                    </div>
-
                                 </div>
-                            </div>
-                        </Col>
-                    })}
-                    {!totalCars && <h1>You save no cars</h1>}
+                            </Col>
+                        }): <h1>You save no cars</h1>}
 
-                </Row>
+
                     </Row>
+                </Row>
             </Row>
 
         </DefaultLayout>
