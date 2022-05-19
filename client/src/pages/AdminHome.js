@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect,useRef} from "react";
 import {useSelector, useDispatch} from "react-redux";
 import DefaultLayout from "../components/DefaultLayout";
 import {deleteCar, getAllCars, getAllCategories} from "../redux/actions/carsActions";
@@ -8,6 +8,7 @@ import Spinner from "../components/Spinner";
 import moment from "moment";
 import {DeleteOutlined, EditOutlined} from "@ant-design/icons";
 import {Popconfirm, message} from "antd";
+import axios from "axios";
 
 const {RangePicker} = DatePicker;
 
@@ -27,6 +28,75 @@ function AdminHome() {
     }, [cars]);
 
     let currentUser = JSON.parse(localStorage.getItem("user"))._id
+    const fileInput = useRef()
+
+
+    const selectJson = (e) => {
+        if (e.target.files) {
+            const fileReader = new FileReader();
+            var file=e.target.files[0]
+            // console.log(file)
+            // var data = JSON.parse(file);
+            // console.log(data)
+
+            fileReader.readAsText(file, "UTF-8");
+            fileReader.onload = e => {
+                const content = e.target.result;
+                console.log(content);
+                var postData=JSON.parse(content)
+                console.log(postData);
+
+                axios.post(
+                    '/api/cars/import',
+                    postData
+                )
+                    .then(res => {
+                        console.log(`Success`)
+                    })
+                    .catch(error => {
+
+                            message.error(`${error.response.data._message} please download correct json`)
+
+                    })
+            };
+        }
+
+
+        // axios.post(
+        //     '/api/cars/import',
+        //     formData,
+        //     {
+        //         headers: {
+        //             "Content-type": "multipart/form-data"
+        //         },
+        //     }
+        // )
+        //     .then(res => {
+        //         console.log(`Success` + res.data);
+        //     })
+        //     .catch(err => {
+        //         console.log(err);
+        //     })
+    }
+
+    // const OnSumbit = (event) => {
+    //     event.preventDefault();
+    //     const formData = new FormData(event.target.form);
+    //
+    //     axios
+    //         .post("/api/cars/import", formData, {
+    //             headers: {
+    //                 "Content-type": "multipart/form-data",
+    //             },
+    //         })
+    //         .then((res) => {
+    //             console.log(`Success` + res.data);
+    //         })
+    //         .catch((err) => {
+    //             console.log(err);
+    //         });
+    // };
+
 
     return (
         <DefaultLayout>
@@ -39,6 +109,24 @@ function AdminHome() {
                         <button className="btn1">
                             <a href="/addcategory">ADD CATEGORY</a>
                         </button>
+                        <input style={{display: 'none'}} ref={fileInput} type="file"
+                               onChange={selectJson}/>
+                        <button onClick={() => fileInput.current.click()}>
+                           download
+                        </button>
+                        {/*<form onSubmit={OnSumbit}>*/}
+
+                        {/*    <input*/}
+
+                        {/*        id="contained-button-content"*/}
+                        {/*        name="customFile"*/}
+                        {/*        type="file"*/}
+                        {/*    />*/}
+                        {/*    <button>zakr</button>*/}
+                        {/*    /!*<Button variant="contained" color="primary">*!/*/}
+                        {/*    /!*    Сохранить и закрыть*!/*/}
+                        {/*    /!*</Button>*!/*/}
+                        {/*</form>*/}
                     </div>
                 </Col>
             </Row>

@@ -109,9 +109,9 @@ function BookingCar({match}) {
                         <div>
                             <img src={car.image} className="carimg2 bs1 w-100"/>
                         </div>
-                        <div>
-                            <img src={car.image} className="carimg2 bs1 w-100"/>
-                        </div>
+                        {/*<div>*/}
+                        {/*    <img src={car.image} className="carimg2 bs1 w-100"/>*/}
+                        {/*</div>*/}
 
                     {/*</Carousel>*/}
                     {car.address && <div>

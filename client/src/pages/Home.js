@@ -168,6 +168,14 @@ function Home() {
                                     </Select>
                                 </Form.Item>
 
+                                <Form.Item name='sorting' label='Sort By'
+                                >
+                                <Radio.Group>
+                                    <Radio value={'engineCapacty'}>Engine capacity</Radio>
+                                    <Radio value={'rentPerHour'}>Rent per Hour</Radio>
+                                </Radio.Group>
+                                </Form.Item>
+
                                 <button className='btn1 mt-2'>Filter</button>
                             </Form>
 
