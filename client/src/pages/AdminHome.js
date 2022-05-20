@@ -1,4 +1,4 @@
-import React, {useState, useEffect,useRef} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {useSelector, useDispatch} from "react-redux";
 import DefaultLayout from "../components/DefaultLayout";
 import {deleteCar, getAllCars, getAllCategories} from "../redux/actions/carsActions";
@@ -34,31 +34,46 @@ function AdminHome() {
     const selectJson = (e) => {
         if (e.target.files) {
             const fileReader = new FileReader();
-            var file=e.target.files[0]
+            var file = e.target.files[0]
             // console.log(file)
             // var data = JSON.parse(file);
             // console.log(data)
+            if (file) {
 
-            fileReader.readAsText(file, "UTF-8");
-            fileReader.onload = e => {
-                const content = e.target.result;
-                console.log(content);
-                var postData=JSON.parse(content)
-                console.log(postData);
+                fileReader.readAsText(file, "UTF-8");
+                fileReader.onload = e => {
+                    const content = e.target.result;
+                    console.log(content);
+                    var postData = JSON.parse(content)
+                    console.log(postData);
 
-                axios.post(
-                    '/api/cars/import',
-                    postData
-                )
-                    .then(res => {
-                        console.log(`Success`)
-                    })
-                    .catch(error => {
+                    axios.post(
+                        '/api/cars/import',
+                        postData
+                    )
+                        .then(res => {
+                            message.success(`Cars added successfully`)
+                            dispatch(getAllCars());
+                        })
+                        .catch(error => {
+                            if (error.response.data) {
+                                message.error(`${error.response.data._message} please download correct json`, 1.5, () => {
+                                    message.info({
+                                        content: error.response.data.message,
+                                        style: {width: '50%', margin: '0 auto'},
+                                        duration: 6
+                                    })
+                                })
+                            }else{
+                                console.log(error)
+                            }
 
-                            message.error(`${error.response.data._message} please download correct json`)
+                        })
+                }
 
-                    })
-            };
+
+            }
+            ;
         }
 
 
@@ -109,10 +124,10 @@ function AdminHome() {
                         <button className="btn1">
                             <a href="/addcategory">ADD CATEGORY</a>
                         </button>
-                        <input style={{display: 'none'}} ref={fileInput} type="file"
+                        <input style={{display: 'none'}} ref={fileInput} type="file" accept="application/json"
                                onChange={selectJson}/>
-                        <button onClick={() => fileInput.current.click()}>
-                           download
+                        <button className="btn1" onClick={() => fileInput.current.click()}>
+                            DOWNLOAD JSON
                         </button>
                         {/*<form onSubmit={OnSumbit}>*/}
 

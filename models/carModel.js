@@ -3,14 +3,13 @@ const mongoose = require("mongoose");
 const carSchema = new mongoose.Schema({
 
         name: {type: String, required: true},
-        user: {type: mongoose.Schema.Types.ObjectID, ref: 'users'},
         image: {type: String, required: true},
         capacity: {type: Number, required: true},
         fuelType: {type: String, required: true},
         bookedTimeSlots: [
             {
-                from: {type: String, required: true},
-                to: {type: String, required: true}
+                from: {type: String},
+                to: {type: String}
             }
         ],
         rentPerHour: {type: Number, required: true},

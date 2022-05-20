@@ -494,7 +494,13 @@ router.post("/import", async (req, res) => {
         // });
         console.log(req.body)
         try {
-           await  Car.insertMany(req.body);
+            // const currentcategory = await Category.findOne({category:req.body.category});
+            //
+            //
+            // const currentaddress = await Location.findOne({country: req.body.country, city: req.body.city, street: req.body.street});
+
+            await  Car.insertMany(req.body);
+            res.status(200).send('Car added successfully');
         } catch (e) {
             console.log(e)
             res.status(400).send(e);
