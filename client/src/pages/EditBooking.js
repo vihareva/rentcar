@@ -1,37 +1,25 @@
-import {Col, Row, Divider, DatePicker, Checkbox, Modal, Popover} from "antd";
-import React, {useState, useEffect} from "react";
-import {useSelector, useDispatch} from "react-redux";
+import React, {useEffect, useState} from "react";
+import {editCar, getAllCars} from "../redux/actions/carsActions";
+import {useDispatch, useSelector} from "react-redux";
 import DefaultLayout from "../components/DefaultLayout";
-import Spinner from "../components/Spinner";
-import {getAllCars} from "../redux/actions/carsActions";
-import moment from "moment";
-import {bookCar} from "../redux/actions/bookingActions";
-import StripeCheckout from "react-stripe-checkout";
-import {Carousel} from 'antd';
-import AOS from 'aos';
 
-import 'aos/dist/aos.css';
+import {Col, Row, Divider, Popover, Modal, Form, Input} from "antd";
+import Spinner from "../components/Spinner";
+import StripeCheckout from "react-stripe-checkout";
 import {HeartFilled, HeartOutlined} from "@ant-design/icons";
 
-const {RangePicker} = DatePicker;
-
-function BookingCar({match}) {
-    const {cars} = useSelector((state) => state.carsReducer);
-    const {loading} = useSelector((state) => state.alertsReducer);
-    const {savedCarsIds} = useSelector((state) => state.carsReducer);
-    const [car, setcar] = useState({});
+function EditBooking({match}) {
     const dispatch = useDispatch();
-    const [from, setFrom] = useState();
-    const [to, setTo] = useState();
-    const [totalHours, setTotalHours] = useState(0);
-    const [driver, setdriver] = useState(false);
-    const [totalAmount, setTotalAmount] = useState(0);
+    const {cars} = useSelector((state) => state.carsReducer);
+    const [car, setcar] = useState({});
+    const {loading} = useSelector((state) => state.alertsReducer);
     const [showModal, setShowModal] = useState(false);
     const [showModalErrorDates, setShowModalErrorDates] = useState(false);
-
+    const [showModalExtend, setShowModalExtend] = useState(false);
+    const {savedCarsIds} = useSelector((state) => state.carsReducer);
 
     useEffect(() => {
-        console.log(cars)
+        console.log(car)
 
         if (cars.length == 0) {
             dispatch(getAllCars());
@@ -39,91 +27,21 @@ function BookingCar({match}) {
             setcar(cars.find((o) => o._id == match.params.carid));
         }
     }, [cars]);
-
-
-    useEffect(() => {
-        setTotalAmount(totalHours * car.rentPerHour);
-        if (driver) {
-            setTotalAmount(totalAmount + 30 * totalHours);
-        }
-    }, [driver, totalHours]);
-
-    let addToSaved = () => {
-        // //dispatch({''})
-        // //localStorage.setItem('userSaved', JSON.stringify(match.params.carid))
-        // let userSavedCars = JSON.parse(localStorage.getItem('userSaved'))
-        // if (userSavedCars) {
-        //     if(userSavedCars.every(c=>c!==match.params.carid)){
-        //         userSavedCars.push(match.params.carid)
-        //     }
-        //     localStorage.setItem('userSaved', JSON.stringify(userSavedCars))
-        // } else {
-        //     localStorage.setItem('userSaved', JSON.stringify([match.params.carid]))
-        // }
-        dispatch({type: 'ADD-SAVED-CAR-ID', payload: match.params.carid})
-    }
-    const disabledDate = (current) => {
-        //документация antd rangepicker и инет
-        return current < moment(Date.now()).add('days', -1)
-    };
-
-    useEffect(()=>{
-        localStorage.setItem('userSaved', JSON.stringify(savedCarsIds))
-    }, [savedCarsIds])
-
-    function selectTimeSlots(values) {
-        if (values) {
-            setFrom(moment(values[0]).format("MMM DD yyyy HH:mm"));
-            console.log(from)
-            setTo(moment(values[1]).format("MMM DD yyyy HH:mm"));
-            console.log(to)
-
-            for (var booking of car.bookedTimeSlots) {
-                if (moment(values[0]).isBetween(booking.from, booking.to) ||
-                    moment(values[1]).isBetween(booking.from, booking.to) ||
-                    moment(booking.from).isBetween(moment(values[0]), moment(values[1])) ||
-                    moment(booking.to).isBetween(moment(values[0]), moment(values[1]))
-                ) {
-                    setShowModalErrorDates(true);
-                    break;
-                }
-            }
-
-
-
-
-
-            setTotalHours(values[1].diff(values[0], "hours"));
-
-
-
-        }
-    }
-
-    console.log(from)
-
-    console.log(to)
-
-    function onToken(token) {
-        const reqObj = {
-            token,
-            user: JSON.parse(localStorage.getItem("user"))._id,
-            car: car._id,
-            totalHours,
-            totalAmount,
-            driverRequired: driver,
-            bookedTimeSlots: {
-                from,
-                to,
-            },
-        };
-
-        dispatch(bookCar(reqObj));
-    }
-
     console.log(car)
 
-    return (
+    function onFinish(values) {
+        // values._id = car._id;
+        //
+        // dispatch(editCar(values));
+        let daysamount=Number(values.daysAmount)
+        console.log(daysamount);
+    }
+
+    let addToSaved = () => {
+        dispatch({type: 'ADD-SAVED-CAR-ID', payload: match.params.carid})
+    }
+    return(
+
         <DefaultLayout>
             {loading && <Spinner/>}
 
@@ -177,13 +95,15 @@ function BookingCar({match}) {
                     <Divider type="horizontal" dashed>
                         Select Time Slots
                     </Divider>
-                    <RangePicker
+                    <button
+                        className="btn1 mt-2"
+                        onClick={() => {
+                            setShowModalExtend(true);
+                        }}
+                    >
+                        Extend My Booking
+                    </button>
 
-                        disabledDate={disabledDate}
-                        showTime={{format: "HH:mm"}}
-                        format="MMM DD yyyy HH:mm"
-                        onChange={selectTimeSlots}
-                    />
                     <br/>
                     <button
                         className="btn1 mt-2"
@@ -193,43 +113,7 @@ function BookingCar({match}) {
                     >
                         See Booked Slots
                     </button>
-                    {from && to && (
-                        <div>
-                            <p>
-                                Total Hours : <b>{totalHours}</b>
-                            </p>
-                            <p>
-                                Rent Per Hour : <b>{car.rentPerHour} $</b>
-                            </p>
-                            {/*<Checkbox*/}
-                            {/*    onChange={(e) => {*/}
-                            {/*        if (e.target.checked) {*/}
-                            {/*            setdriver(true);*/}
-                            {/*        } else {*/}
-                            {/*            setdriver(false);*/}
-                            {/*        }*/}
-                            {/*    }}*/}
-                            {/*>*/}
-                            {/*    Driver Required*/}
-                            {/*</Checkbox>*/}
 
-                            <h3>Total Amount : {totalAmount} $</h3>
-
-                            <StripeCheckout
-                                shippingAddress
-                                token={onToken}
-                                currency='USD'
-                                amount={totalAmount}
-                                stripeKey="pk_test_51KZNyDGfonS0kOfXU7atqutGlXnXtAH2zse6JU16iR8KXz5LZwGZGS4LgIAzOdMbgWL8bZIkx1kZWqYSE0CMRIQh00fpJTnKoe"
-                            >
-                                <button className="btn1">
-                                    Book a car
-                                </button>
-                            </StripeCheckout>
-
-
-                        </div>
-                    )}
                 </Col>
 
                 {car.name && (
@@ -284,10 +168,56 @@ function BookingCar({match}) {
                     </div>
                 </Modal>
 
+                <Modal
+                    visible={showModalExtend}
+                    closable={false}
+                    footer={false}
+
+                >
+                    <div className="p-2">
+
+
+                                    <Form
+                                        initialValues={car}
+                                        className="bs1 p-2"
+                                        layout="vertical"
+                                        onFinish={onFinish}
+                                    >
+                                        <h3>Extend booking</h3>
+
+                                        <hr />
+                                        <Form.Item
+                                            name="daysAmount"
+                                            label="Enter amount of days u want to extend for"
+                                            rules={[{ required: true }]}
+                                        >
+                                            <Input />
+                                        </Form.Item>
+
+
+                                        <div className="text-right">
+                                            <button className="btn1">Extend booking</button>
+                                        </div>
+                                    </Form>
+
+
+                        {/*<div className="text-right mt-5">*/}
+                        {/*    <button*/}
+                        {/*        className="btn1"*/}
+                        {/*        onClick={() => {*/}
+                        {/*            setShowModalExtend(false);*/}
+                        {/*        }}*/}
+                        {/*    >*/}
+                        {/*        CLOSE*/}
+                        {/*    </button>*/}
+                        {/*</div>*/}
+                    </div>
+                </Modal>
+
             </Row>
 
         </DefaultLayout>
-    );
+    )
 }
 
-export default BookingCar;
+export default EditBooking;

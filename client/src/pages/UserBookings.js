@@ -25,6 +25,7 @@ function UserBookings() {
                 {bookings.filter(o=>o.user==user._id).map((booking) => {
                     return <Row gutter={16} className="bs1 mt-3 text-left">
                         <Col lg={6} sm={24}>
+
                             <p><b>{booking.car.name}</b></p>
                             <p>Total hours : <b>{booking.totalHours}</b></p>
                             <p>Rent per hour : <b>{booking.car.rentPerHour}</b></p>
@@ -36,9 +37,16 @@ function UserBookings() {
                             <p>To: <b>{booking.bookedTimeSlots.to}</b></p>
                             <p>Date of booking: <b>{moment(booking.createdAt).format('MMM DD yyyy')}</b></p>
                         </Col>
-
+                      <Col lg={6} sm={24} className='text-right'>
+                        <img style={{borderRadius:5}} src={booking.car.image}  height="140" className="p-2"/>
+                      </Col>
                         <Col lg={6} sm={24} className='text-right'>
-                            <img style={{borderRadius:5}} src={booking.car.image}  height="140" className="p-2"/>
+                          <div>
+                            <button className="btn1 mr-1"><a className={'viewDetails'}
+                                                             href={`/editbooking/${booking.car._id}`}>Edit booking</a>
+                            </button>
+                          </div>
+
                         </Col>
                     </Row>;
                 })}

@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const Booking = require("../models/bookingModel");
 const Car = require("../models/carModel");
+const User= require("../models/userModel");
 const { v4: uuidv4 } = require("uuid");
 const stripe = require("stripe")(
   "sk_test_51KZNyDGfonS0kOfXtcKWwF5TZmpAeBTpdTCSljBV00QIAn2knKElA8tUo6UL3oFvfCeHzPglwXY3mpYBavgPvAB300hpnJAvRg"
@@ -33,14 +34,18 @@ router.post("/bookcar", async (req, res) => {
       req.body.transactionId = payment.source.id;
       const newbooking = new Booking(req.body);
       await newbooking.save();
+
       const car = await Car.findOne({ _id: req.body.car });
       console.log(req.body.car);
       car.bookedTimeSlots.push(req.body.bookedTimeSlots);
-
       await car.save();
+
+        const user = await User.findOne({_id: req.body.user});
+        user.email = req.body.email;
+
+
+        await user.save();
       res.send("Your booking is successfull");
-    } else {
-      return res.status(400).json(error);
     }
   } catch (error) {
     console.log(error);

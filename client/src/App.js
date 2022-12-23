@@ -14,6 +14,7 @@ import {Reviews} from "./pages/Reviews";
 import AddReview from "./pages/AddReview";
 import AddCategory from "./pages/AddCategory";
 import SavedCars from "./pages/SavedCars";
+import EditBooking from "./pages/EditBooking";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
              <ProtectedRoute path='/saved' exact component={SavedCars} />
              <Route path='/reviews' exact component={Reviews} />
              <ProtectedRoute path='/addreview' exact component={AddReview} />
+             <ProtectedRoute path='/editbooking/:carid' exact component={EditBooking} />
          </BrowserRouter>
 
     </div>
