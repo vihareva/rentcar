@@ -20,6 +20,26 @@ export const bookCar = (reqObj) => async (dispatch) => {
   }
 };
 
+export const editBooking = (reqObj) => async (dispatch) => {
+    dispatch({ type: "LOADING", payload: true });
+
+    try {
+        await axios.post("/api/bookings/editbooking" , reqObj);
+
+        dispatch({ type: "LOADING", payload: false });
+        message.success("Your booking extension completed successfully");
+        setTimeout(() => {
+            window.location.href='/userbookings'
+        }, 500);
+
+
+    } catch (error) {
+        console.log(error);
+        dispatch({ type: "LOADING", payload: false });
+        message.error("Something went wrong , please try later");
+    }
+};
+
 export const getAllBookings=()=>async dispatch=>{
 
   dispatch({type: 'LOADING' , payload:true})

@@ -89,13 +89,7 @@ function BookingCar({match}) {
                 }
             }
 
-
-
-
-
-            setTotalHours(values[1].diff(values[0], "hours"));
-
-
+                  setTotalHours(values[1].diff(values[0], "hours"));
 
         }
     }

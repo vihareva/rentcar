@@ -36,7 +36,7 @@ function App() {
              <ProtectedRoute path='/saved' exact component={SavedCars} />
              <Route path='/reviews' exact component={Reviews} />
              <ProtectedRoute path='/addreview' exact component={AddReview} />
-             <ProtectedRoute path='/editbooking/:carid' exact component={EditBooking} />
+             <ProtectedRoute path='/editbooking/:bookingid' exact component={EditBooking} />
          </BrowserRouter>
 
     </div>
