@@ -14,6 +14,7 @@ const bookingSchema = new mongoose.Schema({
             {type: String}
         ],
         driverRequired: {type: Boolean},
+        phone: {type:Number , required: false},
     },
     {timestamps: true}
 )

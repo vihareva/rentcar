@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema({
      username : {type:String , required: [true, 'Username is required']},
      password : {type:String , required: [true, 'Password is required'], minlength: [5, 'password should be minimum 5 symbols']},
      isAdmin : {type: Boolean},
-     email: {type:String , required: false}
+     email: {type:String , required: false},
+     phone: {type:Number , required: false},
 })
 
 //наша модель: название users(по сути users это название коллекции /ТАБЛИЦЫ), и второй арг: схема, по которой формирется модель

@@ -1,4 +1,4 @@
-import {Col, Row, Divider, DatePicker, Checkbox, Modal, Popover} from "antd";
+import {Col, Row, Divider, DatePicker, Checkbox, Modal, Popover, Input, Form, Button, InputNumber} from "antd";
 import React, {useState, useEffect} from "react";
 import {useSelector, useDispatch} from "react-redux";
 import DefaultLayout from "../components/DefaultLayout";
@@ -12,6 +12,7 @@ import AOS from 'aos';
 
 import 'aos/dist/aos.css';
 import {HeartFilled, HeartOutlined} from "@ant-design/icons";
+import useForm from "antd/es/form/hooks/useForm";
 
 const {RangePicker} = DatePicker;
 
@@ -28,7 +29,8 @@ function BookingCar({match}) {
     const [totalAmount, setTotalAmount] = useState(0);
     const [showModal, setShowModal] = useState(false);
     const [showModalErrorDates, setShowModalErrorDates] = useState(false);
-
+    const [phoneNumber, setNumber] = useState(undefined);
+    const [form] = useForm();
 
     useEffect(() => {
         console.log(cars)
@@ -67,7 +69,7 @@ function BookingCar({match}) {
         return current < moment(Date.now()).add('days', -1)
     };
 
-    useEffect(()=>{
+    useEffect(() => {
         localStorage.setItem('userSaved', JSON.stringify(savedCarsIds))
     }, [savedCarsIds])
 
@@ -89,7 +91,7 @@ function BookingCar({match}) {
                 }
             }
 
-                  setTotalHours(values[1].diff(values[0], "hours"));
+            setTotalHours(values[1].diff(values[0], "hours"));
 
         }
     }
@@ -97,6 +99,10 @@ function BookingCar({match}) {
     console.log(from)
 
     console.log(to)
+
+    function onChangeNumber(number) {
+        setNumber(number.currentTarget.value)
+    }
 
     function onToken(token) {
         const reqObj = {
@@ -110,8 +116,9 @@ function BookingCar({match}) {
                 from,
                 to,
             },
+            phone: Number(phoneNumber)
         };
-
+        console.log(phoneNumber)
         dispatch(bookCar(reqObj));
     }
 
@@ -127,7 +134,7 @@ function BookingCar({match}) {
                 style={{minHeight: "90vh"}}
             >
                 <Col lg={10} sm={24} xs={24} className='p-3'>
-
+                    <p className={'carnameinhomepages'}>{car.name}</p>
                     {/*<Carousel effect={'fade'}>*/}
                     <div>
                         <img src={car.image} className="carimg2 bs1 w-100"/>
@@ -142,7 +149,7 @@ function BookingCar({match}) {
                         <p>{car?.address[0]?.street}</p>
                     </div>}
                     <button className="btn1 mt-2" onClick={addToSaved}>
-                        { savedCarsIds.some(c=>c===match.params.carid)? <HeartFilled/>: <HeartOutlined/> }
+                        {savedCarsIds.some(c => c === match.params.carid) ? <HeartFilled/> : <HeartOutlined/>}
                     </button>
                     {/*<img src={car.image} className="carimg2 bs1 w-100" data-aos='flip-left' data-aos-duration='1500'/>*/}
                 </Col>
@@ -151,22 +158,35 @@ function BookingCar({match}) {
                     <Divider type="horizontal" dashed>
                         Car Info
                     </Divider>
-                    <div style={{textAlign: "right"}}>
-                        <p className={'carnameinhomepages'}>{car.name}</p>
-                        <p className={'rentPerHour'}>{car.rentPerHour} $ Per hour /-</p>
-                        {car.category && <Popover overlayStyle={{width: "20vw"}}
-                                                  placement="bottom"
-                                                  title={car.category[0].category}
-                                                  content={car.category[0].description}>
-                            <p><span className={'headerSpan'}><b>Category :</b></span> <b>{car.category[0].category}</b>
-                            </p>
-                        </Popover>}
+                    <Row
+                        justify="space-between"
+                        className="d-flex align-items-center"
+                    >
+                        <Col lg={10} sm={24} xs={24} className='p-2'>
 
-                        <p><span className={'headerSpan'}>Fuel Type :</span> {car.fuelType}</p>
-                        <p><span className={'headerSpan'}>Transmission :</span> {car.transmission}</p>
-                        <p><span className={'headerSpan'}>Max Persons :</span> {car.capacity}</p>
-                        <p><span className={'headerSpan'}>Engine Capacity :</span> {car.engineCapacity}</p>
-                    </div>
+                            <p className={'rentPerHour'}>{car.rentPerHour} $ Per hour /-</p>
+                            {car.category && <Popover overlayStyle={{width: "20vw"}}
+                                                      placement="bottom"
+                                                      title={car.category[0].category}
+                                                      content={car.category[0].description}>
+                                <p><span className={'headerSpan'}><b>Category :</b></span>
+                                    <b>{car.category[0].category}</b>
+                                </p>
+                            </Popover>}
+                            <p><span className={'headerSpan'}>Max Persons :</span> {car.capacity}</p>
+                        </Col>
+                        <Col lg={10} sm={24} xs={24} className='p-2'>
+                            <p><span className={'headerSpan'}>Fuel Type :</span> {car.fuelType}</p>
+                            <p><span className={'headerSpan'}>Transmission :</span> {car.transmission}</p>
+
+                            <p><span className={'headerSpan'}>Engine Capacity :</span> {car.engineCapacity}</p>
+                        </Col>
+                    </Row>
+                    {/*<div style={{textAlign: "right"}}>*/}
+
+
+                    {/*  */}
+                    {/*</div>*/}
 
                     <Divider type="horizontal" dashed>
                         Select Time Slots
@@ -208,18 +228,57 @@ function BookingCar({match}) {
                             {/*</Checkbox>*/}
 
                             <h3>Total Amount : {totalAmount} $</h3>
+                            <Form form={form}>
+                                <Form.Item
+                                    name="phone"
+                                    label="Phone Number"
+                                    rules={[{
+                                        required: true,
+                                        message: 'Please input your phone number ***-**-***-**-**'
+                                    },
+                                        {
+                                            pattern: "[0-9]{3}[0-9]{2}[0-9]{3}[0-9]{2}[0-9]{2}",
+                                            message: 'Please input correct phone number!'
+                                        }
+                                    ]}
+                                >
+                                    <Input onChange={onChangeNumber} className="mb-3" style={{width: '80%'}}/>
+                                </Form.Item>
+                                <StripeCheckout
+                                    shippingAddress
+                                    token={onToken}
+                                    currency='USD'
+                                    amount={totalAmount}
+                                    stripeKey="pk_test_51KZNyDGfonS0kOfXU7atqutGlXnXtAH2zse6JU16iR8KXz5LZwGZGS4LgIAzOdMbgWL8bZIkx1kZWqYSE0CMRIQh00fpJTnKoe"
+                                >
+                                    <Form.Item
+                                        shouldUpdate>
+                                        {() => (
+                                            <Button
+                                                className="btn1"
+                                                type="primary"
+                                                htmlType="submit"
+                                                disabled={
+                                                    !form.isFieldsTouched(true) ||
+                                                    form.getFieldsError().filter(({errors}) => errors.length)
+                                                        .length > 0
+                                                }
+                                            >
+                                                Book a car
+                                            </Button>
+                                        )}
+                                        {/*<button disabled={*/}
+                                        {/*    !form.isFieldsTouched(true) ||*/}
+                                        {/*    form.getFieldsError().filter(({ errors }) => errors.length)*/}
+                                        {/*        .length > 0*/}
+                                        {/*} type={"submit"} className="btn1">*/}
+                                        {/*    Book a car*/}
+                                        {/*</button>*/}
+                                    </Form.Item>
 
-                            <StripeCheckout
-                                shippingAddress
-                                token={onToken}
-                                currency='USD'
-                                amount={totalAmount}
-                                stripeKey="pk_test_51KZNyDGfonS0kOfXU7atqutGlXnXtAH2zse6JU16iR8KXz5LZwGZGS4LgIAzOdMbgWL8bZIkx1kZWqYSE0CMRIQh00fpJTnKoe"
-                            >
-                                <button className="btn1">
-                                    Book a car
-                                </button>
-                            </StripeCheckout>
+                                </StripeCheckout>
+                            </Form>
+                            {/*<Input className="mb-3" pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}"  type={"tel"} size="middle"  placeholder={ " Please enter your telephone number"} />*/}
 
 
                         </div>
