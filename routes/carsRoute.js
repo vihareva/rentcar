@@ -3,18 +3,105 @@ const router = express.Router();
 const Car = require("../models/carModel");
 const Location = require("../models/locationModel");
 const Category = require("../models/categoryModel");
+const Booking = require("../models/bookingModel");
 
 
 const pdf = require('html-pdf');
 
 
 const pdfTemplate = require('./documents');
-const fs = require('fs');
+//const login = require("../client/src/pages/Login");
+//const login = require("../client/src/pages/Login");
+// const fs = require('fs');
+// const login = require("../client/src/pages/Login");
 
 router.get("/getallcars", async (req, res) => {
     try {
-        // const cars = await Car.find();
-        // res.send(cars);
+        // Получаем все документы из коллекции bookings
+        const bookings = await Booking.find({});
+
+        // Создаем объект, который будет представлять матрицу пользовательских предпочтений
+        const preferenceMatrix = {};
+
+        // Проходим по каждому документу в коллекции bookings
+        bookings.forEach((booking) => {
+            // Получаем идентификатор пользователя и машины из текущего документа
+            const userId = booking.user;
+            const carId = booking.car;
+
+            // Если текущий пользователь не был ранее добавлен в матрицу, добавляем его
+            if (!preferenceMatrix[userId]) {
+                preferenceMatrix[userId] = {};
+            }
+
+            // Если текущая машина не была ранее добавлена в матрицу, добавляем ее
+            if (!preferenceMatrix[userId][carId]) {
+                preferenceMatrix[userId][carId] = 0;
+            }
+
+            // Увеличиваем значение в ячейке, соответствующей текущему пользователю и машине, на 1
+            preferenceMatrix[userId][carId]++;
+        });
+        console.log("preferenceMatrix", preferenceMatrix)
+
+        // В результате выполнения этого кода мы получим объект preferenceMatrix,
+        // в котором будут содержаться предпочтения пользователей к машинам.
+        // Например, если preferenceMatrix[user1][car2] равно 3, это означает,
+        // что пользователь user1 предпочитает машину car2 и забронировал ее 3 раза.
+
+        // Функция для вычисления сходства между двумя пользователями
+        function computeSimilarity(user1, user2, preferenceMatrix) {
+            // Получаем множество машин, которые предпочитает первый пользователь
+            const cars1 = Object.keys(preferenceMatrix[user1]);
+
+            // Получаем множество машин, которые предпочитает второй пользователь
+            const cars2 = Object.keys(preferenceMatrix[user2]);
+
+            // Находим пересечение множеств машин
+            const intersection = cars1.filter((car) => cars2.includes(car));
+            console.log(user1, user2, intersection )
+            // Находим объединение множеств машин
+            const union = new Set([...cars1, ...cars2]);
+            console.log(user1, user2, union )
+
+            // Вычисляем сходство Коши между пользователями
+            const similarity = intersection.length / union.size;
+
+            return similarity;
+        }
+
+        // Функция для вычисления сходства между заданным пользователем и остальными пользователями
+        function computeUserSimilarities(userId, preferenceMatrix) {
+            // Получаем список всех пользователей, кроме заданного
+            const users = Object.keys(preferenceMatrix).filter((user) => user !== userId);
+
+            // Создаем объект, который будет хранить сходства между заданным пользователем и остальными пользователями
+            const similarities = {};
+
+            // Проходим по всем пользователям и вычисляем их сходство с заданным пользователем
+            for (let i = 0; i < users.length; i++) {
+                const user = users[i];
+
+                const similarity = computeSimilarity(userId, user, preferenceMatrix);
+
+                // Добавляем сходство между заданным пользователем и текущим пользователем в объект similarities
+                similarities[user] = similarity;
+            }
+
+            return similarities;
+        }
+
+        function findNeighbors(user, preferenceMatrix, numNeighbors = 5) {
+            let similarities = computeUserSimilarities(user, preferenceMatrix);
+            console.log(similarities)
+            let neighbors = Object.keys(similarities)
+                .sort((a, b) => similarities[b] - similarities[a]) // сортируем пользователей по убыванию сходства
+                .slice(0, numNeighbors); // выбираем первые numNeighbors пользователей
+            return neighbors;
+        }
+
+        console.log(findNeighbors('642b1b2364e8158ba847ecf1',preferenceMatrix))
+
 
         await Car.aggregate([{
             $lookup: {
@@ -31,7 +118,7 @@ router.get("/getallcars", async (req, res) => {
                 as: "category"
             }
         }], {}).exec(function (err, cars) {
-            console.log(cars)
+            // console.log(cars)
             res.send(cars)
         });
     } catch (error) {
@@ -58,7 +145,7 @@ router.post("/filter", async (req, res) => {
         let querySortBy = req.body.sorting
         let queryRentPerHour = req.body.rentPerHour
 
-        if(req.body.address){
+        if (req.body.address) {
             var {addressID} = req.body.address
         }
 
@@ -77,13 +164,13 @@ router.post("/filter", async (req, res) => {
                 if (!queryCategories && !queryName && !queryRentPerHour) {
                     const cars = await Car.find().sort({[querySortBy]: 1})
                     res.send(cars);
-                    console.log(cars);
+                    //console.log(cars);
                 }
 
                 //варианты где  в запросе есть все фильтры
                 if (queryCategories && queryName && queryRentPerHour) {
                     const categories = await Category.find({category: {$in: queryCategories}})
-                    console.log(categories)
+                    //console.log(categories)
                     const cars = await Car.find({
                         $and: [
                             {category: {$in: categories.map(c => c._id)}},
@@ -93,15 +180,15 @@ router.post("/filter", async (req, res) => {
                         ]
                     }).sort({[querySortBy]: 1})
                     res.send(cars);
-                    console.log(cars);
+                    //console.log(cars);
                 }
 
 //варианты где  в запросе есть категории(сортируем только по имени или только по цене или обоим)
                 if (queryCategories && !queryName && !queryRentPerHour) {
                     const categories = await Category.find({category: {$in: queryCategories}})
-                    console.log(categories)
+                    //console.log(categories)
                     const cars = await Car.find({category: {$in: categories.map(c => c._id)}}).sort({[querySortBy]: 1})
-                    console.log(cars);
+                    //console.log(cars);
                     res.send(cars);
                 }
 
@@ -499,7 +586,7 @@ router.post("/import", async (req, res) => {
             //
             // const currentaddress = await Location.findOne({country: req.body.country, city: req.body.city, street: req.body.street});
 
-            await  Car.insertMany(req.body);
+            await Car.insertMany(req.body);
             res.status(200).send('Car added successfully');
         } catch (e) {
             console.log(e)

@@ -53,7 +53,7 @@ import DefaultLayout from "../components/DefaultLayout";
 import {useDispatch, useSelector} from "react-redux";
 import {getAllReviews} from "../redux/actions/reviewsActions";
 import Spinner from "../components/Spinner";
-import {Carousel, Col, Row} from "antd";
+import {Carousel, Col, Rate, Row} from "antd";
 
 export function Reviews(props) {
     const {reviews} = useSelector(state => state.reviewsReducer)
@@ -78,6 +78,7 @@ export function Reviews(props) {
                                 <p className={'usernameinreview'}>{review.user[0].username}</p>
                                 <img className="carimgreview " src={review.car[0].image}/>
                                 <p className={'carnameinreview'}>{review.car[0].name}</p>
+                                <Rate disabled defaultValue={review.rating} />
                                 <p className={'descriptioninreview'}>{review.description}</p>
                                 {/*<p> Rent Per Hour {car.rentPerHour} /-</p>*/}
                             </div>
@@ -86,11 +87,6 @@ export function Reviews(props) {
                     {reviews.length === 0 && <h1>No reviews found</h1>}
                 </Col>
             </Row>
-            <button className="btn1">
-                <a href="/addreview">Add review</a>
-            </button>
-
-
         </DefaultLayout>
     );
 }
