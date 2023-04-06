@@ -10,7 +10,6 @@ const reviewSchema = new mongoose.Schema({
     {timestamps: true}
 )
 
-//наша модель: название users(по сути users это название коллекции /ТАБЛИЦЫ), и второй арг: схема, по которой формирется модель
 const reviewModel = mongoose.model('reviews' , reviewSchema)
 
 //экспортируем нашу модель

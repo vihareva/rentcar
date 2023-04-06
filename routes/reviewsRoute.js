@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Review = require("../models/reviewModel");
 const Car = require("../models/carModel");
+const Booking = require("../models/bookingModel");
+const AverageRating = require("../models/averageRatingModel");
 
 router.get("/getallreviews", async (req, res) => {
     try {
@@ -102,7 +104,15 @@ router.get("/getallreviews", async (req, res) => {
 router.post("/addreview", async (req, res) => {
     try {
         const newreview = new Review(req.body);
+        console.log(req.body)
         await newreview.save();
+
+        let booking = await Booking.findOne({_id: req.body.booking});
+        await booking.calculateAverageRating();
+
+        const ratings = await AverageRating.find();
+        console.log(ratings)
+
         res.send("Review added successfully");
     } catch (error) {
         return res.status(400).json(error);
