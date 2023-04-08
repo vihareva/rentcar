@@ -3,8 +3,8 @@ const router = express.Router();
 const Car = require("../models/carModel");
 const Location = require("../models/locationModel");
 const Category = require("../models/categoryModel");
-const Booking = require("../models/bookingModel");
-
+const AverageRating = require("../models/averageRatingModel");
+const mongoose = require("mongoose");
 
 const pdf = require('html-pdf');
 
@@ -12,115 +12,205 @@ const pdf = require('html-pdf');
 const pdfTemplate = require('./documents');
 //const login = require("../client/src/pages/Login");
 //const login = require("../client/src/pages/Login");
+//const login = require("../client/src/pages/Login");
 // const fs = require('fs');
 // const login = require("../client/src/pages/Login");
 
 router.get("/getallcars", async (req, res) => {
     try {
-        // Получаем все документы из коллекции bookings
-        const bookings = await Booking.find({});
-
-        // Создаем объект, который будет представлять матрицу пользовательских предпочтений
+        const averageRatings = await AverageRating.find({})
         const preferenceMatrix = {};
 
-        // Проходим по каждому документу в коллекции bookings
-        bookings.forEach((booking) => {
-            // Получаем идентификатор пользователя и машины из текущего документа
-            const userId = booking.user;
-            const carId = booking.car;
+        averageRatings.forEach(rating => {
+            const userId = rating.user;
+            const carId = rating.car;
 
-            // Если текущий пользователь не был ранее добавлен в матрицу, добавляем его
             if (!preferenceMatrix[userId]) {
                 preferenceMatrix[userId] = {};
             }
 
-            // Если текущая машина не была ранее добавлена в матрицу, добавляем ее
-            if (!preferenceMatrix[userId][carId]) {
-                preferenceMatrix[userId][carId] = 0;
-            }
-
-            // Увеличиваем значение в ячейке, соответствующей текущему пользователю и машине, на 1
-            preferenceMatrix[userId][carId]++;
+            preferenceMatrix[userId][carId] = rating.averageRating;
         });
+
+
         console.log("preferenceMatrix", preferenceMatrix)
 
-        // В результате выполнения этого кода мы получим объект preferenceMatrix,
-        // в котором будут содержаться предпочтения пользователей к машинам.
-        // Например, если preferenceMatrix[user1][car2] равно 3, это означает,
-        // что пользователь user1 предпочитает машину car2 и забронировал ее 3 раза.
+        function cosineSimilarity(user1, user2, preferenceMatrix) {
+            let commonCars = []; // массив общих машин, которые оценили оба пользователя
+            let vector1 = []; // вектор первого пользователя
+            let vector2 = []; // вектор второго пользователя
 
-        // Функция для вычисления сходства между двумя пользователями
-        function computeSimilarity(user1, user2, preferenceMatrix) {
-            // Получаем множество машин, которые предпочитает первый пользователь
-            const cars1 = Object.keys(preferenceMatrix[user1]);
+            // Находим общие машины, которые оценили оба пользователя
+            for (let car in preferenceMatrix[user1]) {
+                if (car in preferenceMatrix[user2]) {
+                    commonCars.push(car);
+                }
+            }
 
-            // Получаем множество машин, которые предпочитает второй пользователь
-            const cars2 = Object.keys(preferenceMatrix[user2]);
+            // Если общих машин нет, то коэффициент сходства равен 0
+            if (commonCars.length === 0) {
+                return 0;
+            }
 
-            // Находим пересечение множеств машин
-            const intersection = cars1.filter((car) => cars2.includes(car));
-            console.log(user1, user2, intersection )
-            // Находим объединение множеств машин
-            const union = new Set([...cars1, ...cars2]);
-            console.log(user1, user2, union )
+            // Заполняем векторы для каждого пользователя, используя оценки для общих машин
+            for (let i = 0; i < commonCars.length; i++) {
+                let car = commonCars[i];
+                vector1.push(preferenceMatrix[user1][car]);
+                vector2.push(preferenceMatrix[user2][car]);
+            }
 
-            // Вычисляем сходство Коши между пользователями
-            const similarity = intersection.length / union.size;
+            // Вычисляем косинусное сходство между векторами пользователей
+            let dotProduct = 0;
+            let norm1 = 0;
+            let norm2 = 0;
+            for (let i = 0; i < commonCars.length; i++) {
+                dotProduct += vector1[i] * vector2[i];
+                norm1 += vector1[i] * vector1[i];
+                norm2 += vector2[i] * vector2[i];
+            }
+            let similarity = dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
 
             return similarity;
         }
 
-        // Функция для вычисления сходства между заданным пользователем и остальными пользователями
-        function computeUserSimilarities(userId, preferenceMatrix) {
-            // Получаем список всех пользователей, кроме заданного
-            const users = Object.keys(preferenceMatrix).filter((user) => user !== userId);
 
-            // Создаем объект, который будет хранить сходства между заданным пользователем и остальными пользователями
-            const similarities = {};
-
-            // Проходим по всем пользователям и вычисляем их сходство с заданным пользователем
-            for (let i = 0; i < users.length; i++) {
-                const user = users[i];
-
-                const similarity = computeSimilarity(userId, user, preferenceMatrix);
-
-                // Добавляем сходство между заданным пользователем и текущим пользователем в объект similarities
-                similarities[user] = similarity;
+        function computeSimilarities(user, preferenceMatrix) {
+            let similarities = {};
+            for (let otherUser in preferenceMatrix) {
+                if (otherUser !== user) {
+                    let similarity = cosineSimilarity(user, otherUser, preferenceMatrix);
+                    similarities[otherUser] = similarity;
+                }
             }
-
+            console.log("similarities", similarities)
             return similarities;
         }
 
         function findNeighbors(user, preferenceMatrix, numNeighbors = 5) {
-            let similarities = computeUserSimilarities(user, preferenceMatrix);
-            console.log(similarities)
+            let similarities = computeSimilarities(user, preferenceMatrix);
             let neighbors = Object.keys(similarities)
                 .sort((a, b) => similarities[b] - similarities[a]) // сортируем пользователей по убыванию сходства
                 .slice(0, numNeighbors); // выбираем первые numNeighbors пользователей
+            console.log("neighbors", neighbors)
             return neighbors;
         }
 
-        console.log(findNeighbors('642b1b2364e8158ba847ecf1',preferenceMatrix))
+        async function getPreferredCars(user, preferenceMatrix) {
+            // Находим ближайших соседей пользователя
+            const neighbors = findNeighbors(user, preferenceMatrix, 5);
+
+            const neighborIds = neighbors.map(neighbor => mongoose.Types.ObjectId(neighbor));
+            console.log("neighborIds", neighborIds)
 
 
-        await Car.aggregate([{
-            $lookup: {
-                from: "locations", // collection name in db
-                localField: "address",
-                foreignField: "_id",
-                as: "address"
-            }
-        }, {
-            $lookup: {
-                from: "categories", // collection name in db
-                localField: "category",
-                foreignField: "_id",
-                as: "category"
-            }
-        }], {}).exec(function (err, cars) {
-            // console.log(cars)
-            res.send(cars)
-        });
+            // Агрегационный запрос для нахождения машин, которые предпочитают ближайшие соседи
+            const preferredCars = await AverageRating.aggregate([
+                {
+                    $match: {
+                        user: {$in: neighborIds},
+                        averageRating: {$gte: 3}
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$car',
+                        count: {$sum: 1}
+                    }
+                },
+                {
+                    $sort: {count: -1}
+                }
+            ]);
+            console.log("preferredCars", preferredCars)
+
+
+            const preferredCarIds = preferredCars.map(car => car._id);
+            console.log("preferredCarIds", preferredCarIds)
+
+
+            // Агрегационный запрос для нахождения машин, которые не предпочитают ближайшие соседи
+            const nonPreferredCars = await Car.aggregate([
+                {
+                    $match: {
+                        // user: {$ne: user},
+                        _id: {$nin: preferredCarIds}
+                    }
+                }
+            ]);
+            const nonPreferredCarsIds = nonPreferredCars.map(car => car._id);
+            console.log("rest", nonPreferredCarsIds)
+
+
+            const preferredCarsFromDB = await Car.aggregate([
+                {
+                    $match: {
+                        _id: {$in: preferredCarIds}
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "locations", // collection name in db
+                        localField: "address",
+                        foreignField: "_id",
+                        as: "address"
+                    }
+                }, {
+                    $lookup: {
+                        from: "categories", // collection name in db
+                        localField: "category",
+                        foreignField: "_id",
+                        as: "category"
+                    }
+                }])
+            console.log("preferredCarsFromDB",preferredCarsFromDB)
+
+            const nonPreferredCarsFromDB = await Car.aggregate([
+                {
+                    $match: {
+                        // user: {$ne: user},
+                        _id: {$nin: preferredCarIds}
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "locations", // collection name in db
+                        localField: "address",
+                        foreignField: "_id",
+                        as: "address"
+                    }
+                }, {
+                    $lookup: {
+                        from: "categories", // collection name in db
+                        localField: "category",
+                        foreignField: "_id",
+                        as: "category"
+                    }
+                }])
+            console.log("nonPreferredCarsFromDB", nonPreferredCarsFromDB)
+            return [...preferredCarsFromDB, ...nonPreferredCarsFromDB ]
+        }
+
+        const recommendations= await getPreferredCars('642b1b2364e8158ba847ecf1', preferenceMatrix)
+       res.send(recommendations)
+
+
+        // const allCars = await Car.aggregate([{
+        //     $lookup: {
+        //         from: "locations", // collection name in db
+        //         localField: "address",
+        //         foreignField: "_id",
+        //         as: "address"
+        //     }
+        // }, {
+        //     $lookup: {
+        //         from: "categories", // collection name in db
+        //         localField: "category",
+        //         foreignField: "_id",
+        //         as: "category"
+        //     }
+        // }])
+        // res.send(allCars)
+
     } catch (error) {
         return res.status(400).json(error);
     }
@@ -552,7 +642,7 @@ router.get("/getallcategories", async (req, res) => {
     try {
         const categories = await Category.find();
         res.send(categories);
-        console.log(categories)
+        // console.log(categories)
 
     } catch (error) {
         return res.status(400).json(error);
@@ -563,7 +653,7 @@ router.get("/getalllocations", async (req, res) => {
     try {
         const locations = await Location.find();
         res.send(locations);
-        console.log(locations)
+        //console.log(locations)
 
     } catch (error) {
         return res.status(400).json(error);
