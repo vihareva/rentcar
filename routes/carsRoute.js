@@ -10,14 +10,59 @@ const pdf = require('html-pdf');
 
 
 const pdfTemplate = require('./documents');
-//const login = require("../client/src/pages/Login");
-//const login = require("../client/src/pages/Login");
-//const login = require("../client/src/pages/Login");
-// const fs = require('fs');
-// const login = require("../client/src/pages/Login");
+const jwt = require("jsonwebtoken");
 
-router.get("/getallcars", async (req, res) => {
+
+//  const authenticateToken = (req, res, next) => {
+//     const authHeader = req.headers['authorization'];
+//     const token = authHeader && authHeader.split(' ')[1];
+//     if (token == null) return res.sendStatus(401);
+//      console.log("token", token)
+//     jwt.verify(token, String(process.env.ACCESS_TOKEN_SECRET), (err, user) => {
+//         if (err) return res.sendStatus(403);
+//         console.log(user)
+//         req.user = user;
+//         next();
+//     });
+// };
+
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const userId = authHeader && authHeader.split(' ')[1];
+    console.log(userId);
+    req.user = userId;
+    next();
+}
+
+
+//router.get("/getallcars", authenticateToken, async (req, res) => {
+router.get("/getallcars", authenticateToken, async (req, res) => {
+
     try {
+        console.log("userrrrrrrrrrrrrrrrrrrrrr", req.user)
+      //  если пользователь не бронировал ничего и не ставил оценки, значит отправь все машины
+        let userRatings = await AverageRating.find({user:  req.user});
+        if (userRatings.length === 0) {
+            const allCars = await Car.aggregate([{
+                $lookup: {
+                    from: "locations", // collection name in db
+                    localField: "address",
+                    foreignField: "_id",
+                    as: "address"
+                }
+            }, {
+                $lookup: {
+                    from: "categories", // collection name in db
+                    localField: "category",
+                    foreignField: "_id",
+                    as: "category"
+                }
+            }])
+            res.send(allCars)
+        }
+
+
+        //если у пользователя есть оценки
         const averageRatings = await AverageRating.find({})
         const preferenceMatrix = {};
 
@@ -140,11 +185,32 @@ router.get("/getallcars", async (req, res) => {
             const nonPreferredCarsIds = nonPreferredCars.map(car => car._id);
             console.log("rest", nonPreferredCarsIds)
 
+            //Оператор $addFields добавляет новое поле __order для каждого выбранного автомобиля.
+            //Это поле содержит индекс _id каждого автомобиля в массиве preferredCarIds
+
+            // Например, если _id автомобиля равен b, а preferredCarIds имеет вид [a, b, c],
+            // то __order будет равен 1, так как индекс "b" в массиве preferredCarIds равен 1.
+
+            // $sort: Оператор $sort сортирует выбранные автомобили по полю __order в порядке возрастания.
+            // Это означает, что автомобили, чьи _id имеют меньший индекс в массиве preferredCarIds,
+            // будут отображаться первыми в результате запроса.
 
             const preferredCarsFromDB = await Car.aggregate([
                 {
                     $match: {
                         _id: {$in: preferredCarIds}
+                    }
+                },
+                {
+                    $addFields: {
+                        "__order": {
+                            "$indexOfArray": [preferredCarIds, "$_id"]
+                        }
+                    }
+                },
+                {
+                    $sort: {
+                        "__order": 1
                     }
                 },
                 {
@@ -162,7 +228,7 @@ router.get("/getallcars", async (req, res) => {
                         as: "category"
                     }
                 }])
-            console.log("preferredCarsFromDB",preferredCarsFromDB)
+            console.log("preferredCarsFromDB", preferredCarsFromDB)
 
             const nonPreferredCarsFromDB = await Car.aggregate([
                 {
@@ -187,29 +253,12 @@ router.get("/getallcars", async (req, res) => {
                     }
                 }])
             console.log("nonPreferredCarsFromDB", nonPreferredCarsFromDB)
-            return [...preferredCarsFromDB, ...nonPreferredCarsFromDB ]
+            return [...preferredCarsFromDB, ...nonPreferredCarsFromDB]
         }
 
-        const recommendations= await getPreferredCars('642b1b2364e8158ba847ecf1', preferenceMatrix)
-       res.send(recommendations)
+        const recommendations = await getPreferredCars(req.user, preferenceMatrix)
+        res.send(recommendations)
 
-
-        // const allCars = await Car.aggregate([{
-        //     $lookup: {
-        //         from: "locations", // collection name in db
-        //         localField: "address",
-        //         foreignField: "_id",
-        //         as: "address"
-        //     }
-        // }, {
-        //     $lookup: {
-        //         from: "categories", // collection name in db
-        //         localField: "category",
-        //         foreignField: "_id",
-        //         as: "category"
-        //     }
-        // }])
-        // res.send(allCars)
 
     } catch (error) {
         return res.status(400).json(error);

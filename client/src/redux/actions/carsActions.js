@@ -7,7 +7,17 @@ export const getAllCars=()=>async dispatch=>{
     dispatch({type: 'LOADING' , payload:true})
 
     try {
-        const response = await axios.get('/api/cars/getallcars')
+        // const token = localStorage.getItem('token'); // Получаем JWT токен из localStorage
+        // const response = await axios.get('/api/cars/getallcars', {
+        //     headers: {
+        //         'Authorization': `Bearer ${token}` // Передаем токен в заголовке запроса
+        //     }
+        // });
+        const response = await axios.get('/api/cars/getallcars', {
+            headers: {
+                'Authorization': `Bearer ${JSON.parse(localStorage.getItem("user"))._id}` // Передаем токен в заголовке запроса
+            }
+        });
         dispatch({type: 'GET_ALL_CARS', payload:response.data})
         dispatch({type: 'LOADING' , payload:false})
     } catch (error) {

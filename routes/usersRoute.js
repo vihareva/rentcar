@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 //подключаем модель User
 const User = require("../models/userModel")
-
+const jwt = require("jsonwebtoken");
 
 router.post("/login", async (req, res) => {
     //получили с клиента в теле запроса объект из которого достали нужные св-ва
@@ -11,17 +11,22 @@ router.post("/login", async (req, res) => {
     try {
         //ищем нужного user
         const user = await User.findOne({username, password})
+        console.log(user)
         if (user) {
-            //если нашли то отправляем его обратно
-            res.send(user)
+            // Создание JWT
+            // const jwtUser = { username: user.username };
+            // console.log("jwtUser", jwtUser)
+            // const accessToken = jwt.sign(jwtUser, String(process.env.ACCESS_TOKEN_SECRET));
+            // console.log(accessToken)
+            // console.log("{ accessToken, user }", { accessToken, user })
+            // res.send({ accessToken, user })
+            res.send({ user })
         }
         else {
          res.status(400).send({ error: 'Incorrect username or password' });
-            // return res.status(400).json({ error: 'Incorrect email or password' });
         }
     } catch (error) {
         res.status(400).send({ error: 'Something failed!'  });
-        //return res.status(400).json({ error: 'Something failed!' });
     }
 
 });

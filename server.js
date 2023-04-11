@@ -1,5 +1,6 @@
 //подключили библиотеку express
 const express = require('express')
+const jwt = require('jsonwebtoken')
 
 //объект нашего приложения(создали наше приложение)
 const app = express()
